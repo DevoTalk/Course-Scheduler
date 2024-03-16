@@ -4,10 +4,6 @@ namespace Course_Scheduler.Models
 {
     public class Teacher : Base
     {
-
-        [Key]
-        public int ID { get; set; }
-
         public string Name { get; set; }
 
     }
