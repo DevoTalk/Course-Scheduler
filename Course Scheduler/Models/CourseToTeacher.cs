@@ -1,4 +1,6 @@
-﻿namespace Course_Scheduler.Models
+﻿using Course_Scheduler.Models.Enum;
+
+namespace Course_Scheduler.Models
 {
     public class CourseToTeacher : Base
     {
@@ -7,5 +9,8 @@
 
         public int TeacherID { get; set; }
         public Teacher Teacher { get; set; }
+
+
+        public ClassTime ClassTime { get; set; }
     }
 }
