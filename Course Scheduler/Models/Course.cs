@@ -8,9 +8,10 @@ namespace Course_Scheduler.Models
         public int ID { get; set; }
         
         public string Name { get; set; }
-        
-        public Course? Required { get; set; }
 
+        public int? RequiredCourseID { get; set; }
+        public Course? RequiredCourse { get; set; }
+        
         
     }
 }
