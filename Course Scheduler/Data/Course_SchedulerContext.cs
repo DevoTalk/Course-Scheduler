@@ -26,5 +26,6 @@ namespace Course_Scheduler.Data
         }
         
         public DbSet<Course_Scheduler.Models.Teacher> Teacher { get; set; } = default!;
+        public DbSet<Course_Scheduler.Models.Course> Courses { get; set; } = default!;
     }
 }
