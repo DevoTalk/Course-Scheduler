@@ -7,6 +7,8 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Course_Scheduler.Data;
 using Course_Scheduler.Models;
+using Course_Scheduler.Models.ViewModels;
+using Course_Scheduler.Models.Enum;
 
 namespace Course_Scheduler.Controllers
 {
@@ -54,15 +56,21 @@ namespace Course_Scheduler.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Name,PreferredTime,ID")] Teacher teacher)
+        public async Task<IActionResult> Create(AddTeacherViewModel teacherViewModel)
         {
+            
             if (ModelState.IsValid)
             {
+                var teacher = new Teacher()
+                {
+                    Name = teacherViewModel.Name,
+                    PreferredTime = teacherViewModel.PreferredTime,
+                };
                 _context.Add(teacher);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            return View(teacher);
+            return View(teacherViewModel);
         }
 
         // GET: Teachers/Edit/5
