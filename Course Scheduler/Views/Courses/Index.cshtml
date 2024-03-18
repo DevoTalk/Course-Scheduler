@@ -1,4 +1,4 @@
-﻿@model IEnumerable<Course_Scheduler.Models.Course>
+﻿@model IEnumerable<Course_Scheduler.Models.ViewModels.CourseAndTeachersViewModel>
 
 @{
     ViewData["Title"] = "Index";
@@ -13,29 +13,36 @@
     <thead>
         <tr>
             <th>
-                @Html.DisplayNameFor(model => model.Name)
+                @Html.DisplayNameFor(model => model.Course.Name)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.RequiredCourse)
+                @Html.DisplayNameFor(model => model.Course.RequiredCourse)
+            </th>
+            <th>
+                Teachers
             </th>
             <th></th>
         </tr>
     </thead>
     <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Name)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.RequiredCourse.Name)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.ID">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.ID">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.ID">Delete</a>
-            </td>
-        </tr>
-}
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Course.Name)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Course.RequiredCourse.Name)
+                </td>
+                <td>
+                    @string.Join(",", @item.Teachers.Select(t => t.Name))
+                </td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@item.Course.ID">Edit</a> |
+                    <a asp-action="Details" asp-route-id="@item.Course.ID">Details</a> |
+                    <a asp-action="Delete" asp-route-id="@item.Course.ID">Delete</a>
+                </td>
+            </tr>
+        }
     </tbody>
 </table>

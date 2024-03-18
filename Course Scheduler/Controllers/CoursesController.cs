@@ -7,6 +7,8 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Course_Scheduler.Data;
 using Course_Scheduler.Models;
+using Course_Scheduler.Models.ViewModels;
+using NuGet.DependencyResolver;
 
 namespace Course_Scheduler.Controllers
 {
@@ -22,8 +24,24 @@ namespace Course_Scheduler.Controllers
         // GET: Courses
         public async Task<IActionResult> Index()
         {
-            var course_SchedulerContext = _context.Courses.Include(c => c.RequiredCourse);
-            return View(await course_SchedulerContext.ToListAsync());
+            var courseAndTeachersViewModel = new List<CourseAndTeachersViewModel>();
+            var courses= await _context.Courses.Include(c => c.RequiredCourse).ToListAsync();
+            foreach(var course in courses)
+            {
+                var teachresIds = await _context.CourseToTeacher.Where(c => c.CourseID == course.ID).Select(p => p.TeacherID).ToListAsync();
+                var teachers = new List<Teacher>();
+                foreach (var id in teachresIds)
+                {
+                     teachers.Add(_context.Teacher.First(t => t.ID == id));
+                }
+                courseAndTeachersViewModel.Add(new()
+                {
+                    Course = course,
+                    Teachers = teachers
+                });
+            }
+
+            return View(courseAndTeachersViewModel);
         }
 
         // GET: Courses/Details/5
