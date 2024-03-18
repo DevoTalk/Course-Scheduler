@@ -1,4 +1,4 @@
-﻿@model Course_Scheduler.Models.Course
+﻿@model Course_Scheduler.Models.ViewModels.CourseAndTeachersViewModel
 
 @{
     ViewData["Title"] = "Details";
@@ -11,20 +11,27 @@
     <hr />
     <dl class="row">
         <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Name)
+            @Html.DisplayNameFor(model => model.Course.Name)
         </dt>
         <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Name)
+            @Html.DisplayFor(model => model.Course.Name)
         </dd>
         <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.RequiredCourse)
+            @Html.DisplayNameFor(model => model.Course.RequiredCourse)
         </dt>
         <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.RequiredCourse.ID)
+           
+            @Html.DisplayFor(model => model.Course.RequiredCourse.Name)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Teachers)
+        </dt>
+        <dd class="col-sm-10">
+             @string.Join(" , ", Model.Teachers.Select(t => t.Name))
         </dd>
     </dl>
 </div>
 <div>
-    <a asp-action="Edit" asp-route-id="@Model?.ID">Edit</a> |
+    <a asp-action="Edit" asp-route-id="@Model?.Course.ID">Edit</a> |
     <a asp-action="Index">Back to List</a>
 </div>

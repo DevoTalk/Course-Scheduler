@@ -1,7 +1,8 @@
-﻿@model Course_Scheduler.Models.Course
+﻿@model Course_Scheduler.Models.ViewModels.AddCourseViewModel
 
 @{
     ViewData["Title"] = "Edit";
+    List<Teacher> teachers = ViewBag.Teachers;
 }
 
 <h1>Edit</h1>
@@ -13,22 +14,34 @@
         <form asp-action="Edit">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="form-group">
-                <label asp-for="Name" class="control-label"></label>
-                <input asp-for="Name" class="form-control" />
-                <span asp-validation-for="Name" class="text-danger"></span>
+                <label asp-for="Course.Name" class="control-label"></label>
+                <input asp-for="Course.Name" class="form-control" />
+                <span asp-validation-for="Course.Name" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="RequiredCourseID" class="control-label"></label>
-                <select asp-for="RequiredCourseID" class="form-control">
+                <label asp-for="Course.RequiredCourseID" class="control-label"></label>
+                <select asp-for="Course.RequiredCourseID" class="form-control">
                     <option value=""> </option>
                     @foreach (var item in ViewBag.RequiredCourse)
                     {
                         <option value="@item.ID">@item.Name</option>
                     }
                 </select>
-                <span asp-validation-for="RequiredCourseID" class="text-danger"></span>
+                <span asp-validation-for="Course.RequiredCourseID" class="text-danger"></span>
             </div>
-            <input type="hidden" asp-for="ID" />
+            <div class="form-group">
+                <label asp-for="TeachersId" class="control-label"></label>
+                <span asp-validation-for="TeachersId" class="text-danger"></span>
+                <br />
+                @foreach (var item in teachers)
+                {
+                    <div class="form-check form-check-inline">
+                        <label class="form-check-label" for="@($"chk{item.Name}")">@item.Name</label>
+                        <input class="form-check-input" type="checkbox" id="@($"chk{item.ID}")" name="TeachersId" value="@item.ID" @(Model.TeachersId.Contains(item.ID) ? "checked" : "")>
+                    </div>
+                }
+            </div>
+            <input type="hidden" asp-for="Course.ID" />
             <div class="form-group">
                 <input type="submit" value="Save" class="btn btn-primary" />
             </div>

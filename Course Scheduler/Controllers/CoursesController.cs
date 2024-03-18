@@ -59,14 +59,25 @@ namespace Course_Scheduler.Controllers
             {
                 return NotFound();
             }
-
-            return View(course);
+            var teachresIds = await _context.CourseToTeacher.Where(c => c.CourseID == course.ID).Select(p => p.TeacherID).ToListAsync();
+            var teachers = new List<Teacher>();
+            foreach (var teachreId in teachresIds)
+            {
+                teachers.Add(_context.Teacher.First(t => t.ID == teachreId));
+            }
+            CourseAndTeachersViewModel viewModel = new CourseAndTeachersViewModel()
+            {
+                Course = course,
+                Teachers = teachers
+            };
+            return View(viewModel);
         }
 
         // GET: Courses/Create
         public IActionResult Create()
         {
             ViewData["RequiredCourse"] = _context.Courses.ToList();
+            ViewData["Teachers"] = _context.Teacher.ToList();
             return View();
         }
 
@@ -75,16 +86,28 @@ namespace Course_Scheduler.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Name,RequiredCourseID,ID")] Course course)
+        public async Task<IActionResult> Create(AddCourseViewModel courseAndTeachers)
         {
             if (ModelState.IsValid)
             {
-                _context.Add(course);
+                _context.Add(courseAndTeachers.Course);
+                await _context.SaveChangesAsync();
+                foreach (var teacherid in courseAndTeachers.TeachersId)
+                {
+                    _context.CourseToTeacher.Add(new()
+                    {
+                        Course = courseAndTeachers.Course,
+                        TeacherID = teacherid
+                    });
+                }
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["RequiredCourseID"] = new SelectList(_context.Courses, "ID", "ID", course.RequiredCourseID);
-            return View(course);
+            ViewData["RequiredCourse"] = _context.Courses.ToList();
+            ViewData["RequiredCourseID"] = new SelectList(_context.Courses, "ID", "ID", courseAndTeachers.Course.RequiredCourseID);
+            ViewData["Teachers"] = _context.Teacher.ToList();
+
+            return View(courseAndTeachers);
         }
 
         // GET: Courses/Edit/5
@@ -103,7 +126,14 @@ namespace Course_Scheduler.Controllers
             var courses = _context.Courses.ToList();
             courses.Remove(course);
             ViewData["RequiredCourse"] = courses;
-            return View(course);
+            ViewData["Teachers"] = _context.Teacher.ToList();
+            var techersOfCourse = _context.CourseToTeacher.Where(c => c.CourseID == id).Select(c => c.TeacherID).ToList();
+            var viewmodel = new AddCourseViewModel()
+            {
+                Course = course,
+                TeachersId = techersOfCourse
+            };
+            return View(viewmodel);
         }
 
         // POST: Courses/Edit/5
@@ -111,9 +141,9 @@ namespace Course_Scheduler.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Name,RequiredCourseID,ID")] Course course)
+        public async Task<IActionResult> Edit(int id,AddCourseViewModel viewModel)
         {
-            if (id != course.ID)
+            if (id != viewModel.Course.ID)
             {
                 return NotFound();
             }
@@ -122,12 +152,25 @@ namespace Course_Scheduler.Controllers
             {
                 try
                 {
-                    _context.Update(course);
+                    var removeOldTecherOfCourse = _context.CourseToTeacher.Where(c => c.CourseID == viewModel.Course.ID);
+                    foreach (var teacher in removeOldTecherOfCourse)
+                    {
+                        _context.CourseToTeacher.Remove(teacher);
+                    }
+                    _context.Update(viewModel.Course);
+                    foreach(var TeacherId in viewModel.TeachersId)
+                    {
+                        _context.CourseToTeacher.Add(new()
+                        {
+                            Course = viewModel.Course,
+                            TeacherID = TeacherId
+                        });
+                    }
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!CourseExists(course.ID))
+                    if (!CourseExists(viewModel.Course.ID))
                     {
                         return NotFound();
                     }
@@ -138,8 +181,8 @@ namespace Course_Scheduler.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["RequiredCourseID"] = new SelectList(_context.Courses, "ID", "ID", course.RequiredCourseID);
-            return View(course);
+            ViewData["RequiredCourseID"] = new SelectList(_context.Courses, "ID", "ID", viewModel.Course.RequiredCourseID);
+            return View(viewModel);
         }
 
         // GET: Courses/Delete/5
@@ -174,6 +217,12 @@ namespace Course_Scheduler.Controllers
                 {
                     item.RequiredCourseID = null;
                 }
+                var teacherCourse = _context.CourseToTeacher.Where(c => c.CourseID == id);
+                foreach (var item in teacherCourse)
+                {
+                    _context.Remove(item);
+                }
+
                 _context.Courses.Remove(course);
                 
             }
