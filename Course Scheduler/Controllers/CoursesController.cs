@@ -25,7 +25,7 @@ namespace Course_Scheduler.Controllers
         public async Task<IActionResult> Index()
         {
             var courseAndTeachersViewModel = new List<CourseAndTeachersViewModel>();
-            var courses= await _context.Courses.Include(c => c.RequiredCourse).ToListAsync();
+            var courses= await _context.Courses.Include(c => c.Prerequisite).ToListAsync();
             foreach(var course in courses)
             {
                 var teachresIds = await _context.CourseToTeacher.Where(c => c.CourseID == course.ID).Select(p => p.TeacherID).ToListAsync();
@@ -53,7 +53,7 @@ namespace Course_Scheduler.Controllers
             }
 
             var course = await _context.Courses
-                .Include(c => c.RequiredCourse)
+                .Include(c => c.Prerequisite)
                 .FirstOrDefaultAsync(m => m.ID == id);
             if (course == null)
             {
@@ -104,7 +104,7 @@ namespace Course_Scheduler.Controllers
                 return RedirectToAction(nameof(Index));
             }
             ViewData["RequiredCourse"] = _context.Courses.ToList();
-            ViewData["RequiredCourseID"] = new SelectList(_context.Courses, "ID", "ID", courseAndTeachers.Course.RequiredCourseID);
+            ViewData["RequiredCourseID"] = new SelectList(_context.Courses, "ID", "ID", courseAndTeachers.Course.PrerequisiteID);
             ViewData["Teachers"] = _context.Teacher.ToList();
 
             return View(courseAndTeachers);
@@ -181,7 +181,7 @@ namespace Course_Scheduler.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["RequiredCourseID"] = new SelectList(_context.Courses, "ID", "ID", viewModel.Course.RequiredCourseID);
+            ViewData["RequiredCourseID"] = new SelectList(_context.Courses, "ID", "ID", viewModel.Course.PrerequisiteID);
             return View(viewModel);
         }
 
@@ -194,7 +194,7 @@ namespace Course_Scheduler.Controllers
             }
 
             var course = await _context.Courses
-                .Include(c => c.RequiredCourse)
+                .Include(c => c.Prerequisite)
                 .FirstOrDefaultAsync(m => m.ID == id);
             if (course == null)
             {
@@ -212,10 +212,10 @@ namespace Course_Scheduler.Controllers
             var course = await _context.Courses.FindAsync(id);
             if (course != null)
             {
-                var coursesToUpdate = _context.Courses.Where(c => c.RequiredCourseID == id);
+                var coursesToUpdate = _context.Courses.Where(c => c.PrerequisiteID == id);
                 foreach (var item in coursesToUpdate)
                 {
-                    item.RequiredCourseID = null;
+                    item.PrerequisiteID = null;
                 }
                 var teacherCourse = _context.CourseToTeacher.Where(c => c.CourseID == id);
                 foreach (var item in teacherCourse)
