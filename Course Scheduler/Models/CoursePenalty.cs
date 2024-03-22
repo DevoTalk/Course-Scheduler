@@ -7,7 +7,7 @@ namespace Course_Scheduler.Models
         public int CourseID { get; set; }
         public Course Course { get; set; }
         
-        public int RelatedID { get; set; }
+        public int CourseWithPenaltyID { get; set; }
 
         public int PenaltyCount { get; set; } = 0;
     

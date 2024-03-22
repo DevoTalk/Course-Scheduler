@@ -101,6 +101,16 @@ namespace Course_Scheduler.Controllers
                     });
                 }
                 await _context.SaveChangesAsync();
+                var courses = await _context.Courses.ToListAsync();
+                foreach (var course in courses) {
+                    _context.CoursePenalty.Add(new()
+                    {
+                        Course = courseAndTeachers.Course,
+                        CourseWithPenaltyID = course.ID,
+                        PenaltyCount = 0
+                    });
+                }
+                await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
             ViewData["RequiredCourse"] = _context.Courses.ToList();

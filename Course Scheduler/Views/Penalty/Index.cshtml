@@ -1,0 +1,28 @@
+﻿@model IEnumerable<Course_Scheduler.Models.Course>
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>Index</h1>
+
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                name
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@item.ID">@item.Name</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
