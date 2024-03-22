@@ -44,6 +44,30 @@ namespace Course_Scheduler.Migrations
                     b.ToTable("Courses");
                 });
 
+            modelBuilder.Entity("Course_Scheduler.Models.CoursePenalty", b =>
+                {
+                    b.Property<int>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"));
+
+                    b.Property<int>("CourseID")
+                        .HasColumnType("int");
+
+                    b.Property<int>("PenaltyCount")
+                        .HasColumnType("int");
+
+                    b.Property<int>("RelatedID")
+                        .HasColumnType("int");
+
+                    b.HasKey("ID");
+
+                    b.HasIndex("CourseID");
+
+                    b.ToTable("CoursePenalty");
+                });
+
             modelBuilder.Entity("Course_Scheduler.Models.CourseToTeacher", b =>
                 {
                     b.Property<int>("ID")
@@ -98,6 +122,17 @@ namespace Course_Scheduler.Migrations
                         .HasForeignKey("PrerequisiteID");
 
                     b.Navigation("Prerequisite");
+                });
+
+            modelBuilder.Entity("Course_Scheduler.Models.CoursePenalty", b =>
+                {
+                    b.HasOne("Course_Scheduler.Models.Course", "Course")
+                        .WithMany()
+                        .HasForeignKey("CourseID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Course");
                 });
 
             modelBuilder.Entity("Course_Scheduler.Models.CourseToTeacher", b =>

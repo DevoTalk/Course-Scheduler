@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Course_Scheduler.Migrations
 {
     [DbContext(typeof(Course_SchedulerContext))]
-    [Migration("20240318021249_addCToT")]
-    partial class addCToT
+    [Migration("20240322192256_add-course-penalty-9")]
+    partial class addcoursepenalty9
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -37,14 +37,38 @@ namespace Course_Scheduler.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("RequiredCourseID")
+                    b.Property<int?>("PrerequisiteID")
                         .HasColumnType("int");
 
                     b.HasKey("ID");
 
-                    b.HasIndex("RequiredCourseID");
+                    b.HasIndex("PrerequisiteID");
 
                     b.ToTable("Courses");
+                });
+
+            modelBuilder.Entity("Course_Scheduler.Models.CoursePenalty", b =>
+                {
+                    b.Property<int>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"));
+
+                    b.Property<int>("CourseID")
+                        .HasColumnType("int");
+
+                    b.Property<int>("PenaltyCount")
+                        .HasColumnType("int");
+
+                    b.Property<int>("RelatedID")
+                        .HasColumnType("int");
+
+                    b.HasKey("ID");
+
+                    b.HasIndex("CourseID");
+
+                    b.ToTable("CoursePenalty");
                 });
 
             modelBuilder.Entity("Course_Scheduler.Models.CourseToTeacher", b =>
@@ -96,11 +120,22 @@ namespace Course_Scheduler.Migrations
 
             modelBuilder.Entity("Course_Scheduler.Models.Course", b =>
                 {
-                    b.HasOne("Course_Scheduler.Models.Course", "RequiredCourse")
+                    b.HasOne("Course_Scheduler.Models.Course", "Prerequisite")
                         .WithMany()
-                        .HasForeignKey("RequiredCourseID");
+                        .HasForeignKey("PrerequisiteID");
 
-                    b.Navigation("RequiredCourse");
+                    b.Navigation("Prerequisite");
+                });
+
+            modelBuilder.Entity("Course_Scheduler.Models.CoursePenalty", b =>
+                {
+                    b.HasOne("Course_Scheduler.Models.Course", "Course")
+                        .WithMany()
+                        .HasForeignKey("CourseID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Course");
                 });
 
             modelBuilder.Entity("Course_Scheduler.Models.CourseToTeacher", b =>

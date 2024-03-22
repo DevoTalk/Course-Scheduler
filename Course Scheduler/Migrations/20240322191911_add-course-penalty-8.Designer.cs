@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Course_Scheduler.Migrations
 {
     [DbContext(typeof(Course_SchedulerContext))]
-    [Migration("20240321225418_cheange-name")]
-    partial class cheangename
+    [Migration("20240322191911_add-course-penalty-8")]
+    partial class addcoursepenalty8
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -45,6 +45,28 @@ namespace Course_Scheduler.Migrations
                     b.HasIndex("PrerequisiteID");
 
                     b.ToTable("Courses");
+                });
+
+            modelBuilder.Entity("Course_Scheduler.Models.CoursePenalty", b =>
+                {
+                    b.Property<int>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"));
+
+                    b.Property<int>("PenaltyCount")
+                        .HasColumnType("int");
+
+                    b.Property<int>("RelatedCourasdfasdfasdfasdfse")
+                        .HasColumnType("int");
+
+                    b.Property<int>("asdfasdfadsf")
+                        .HasColumnType("int");
+
+                    b.HasKey("ID");
+
+                    b.ToTable("CoursePenalty");
                 });
 
             modelBuilder.Entity("Course_Scheduler.Models.CourseToTeacher", b =>
