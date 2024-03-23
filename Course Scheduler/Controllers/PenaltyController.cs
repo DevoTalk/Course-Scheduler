@@ -1,4 +1,5 @@
 ﻿using Course_Scheduler.Data;
+using Course_Scheduler.Models;
 using Course_Scheduler.Models.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -20,49 +21,87 @@ namespace Course_Scheduler.Controllers
             return View(courses);
         }
 
-        public async Task<IActionResult> Edit(int id) 
+        public async Task<IActionResult> Edit(int id)
         {
             var viewModel = new List<CoursePenaltyViewModel>();
-            ViewData["Course"] = await _context.Courses.FirstAsync(c => c.ID == id);
-            var penaltyCourses = await _context.CoursePenalty.Where(cp => cp.CourseID == id).ToListAsync();
+
+            var course = await _context.Courses.FirstAsync(c => c.ID == id);
+            ViewData["Course"] = course;
+            var penaltyCourses = await _context.CoursePenalty.Where(cp => cp.CourseID == id || cp.CourseWithPenaltyID == id).ToListAsync();
+
             foreach (var penaltyCourse in penaltyCourses)
             {
-                var PCourse = await _context.Courses.FirstOrDefaultAsync(c => c.ID == penaltyCourse.CourseWithPenaltyID);
+                Course PCourse;
+                if (penaltyCourse.CourseID == id)
+                {
+                    PCourse = await _context.Courses.FirstAsync(c => c.ID == penaltyCourse.CourseWithPenaltyID);
+                }
+                else
+                {
+                    PCourse = await _context.Courses.FirstAsync(c => c.ID == penaltyCourse.CourseID);
+                }
                 viewModel.Add(new CoursePenaltyViewModel
                 {
                     CourseWithPenalty = PCourse,
                     PenaltyCount = penaltyCourse.PenaltyCount
                 });
+
             }
             return View(viewModel);
         }
         [HttpPost]
+        //changeeeee
         public async Task<IActionResult> Edit(int id, List<CoursePenaltyViewModel> coursePenaltyViewModels)
         {
-            //var viewModel = new List<CoursePenaltyViewModel>();
-            var coursePenalty = await _context.CoursePenalty.Where(cp => cp.CourseID == id).ToListAsync();
-            foreach (var cp in coursePenalty)
+            foreach (var item in coursePenaltyViewModels)
             {
-                foreach(var editedCp in coursePenaltyViewModels)
+                var cp = await _context.CoursePenalty.FirstAsync(cp =>
+                    (cp.CourseID == id && cp.CourseWithPenaltyID == item.CourseWithPenalty.ID) ||
+                    (cp.CourseID == item.CourseWithPenalty.ID && cp.CourseWithPenaltyID == id));
+                cp.PenaltyCount = item.PenaltyCount;
+                _context.Update(cp);
+                await _context.SaveChangesAsync();
+            }
+            return RedirectToAction(nameof(Index));
+        }
+
+
+
+        public async Task<IActionResult> GeneratePenalty()
+        {
+            var penaltyToRemove = await _context.CoursePenalty.ToListAsync();
+            _context.CoursePenalty.RemoveRange(penaltyToRemove);
+            await _context.SaveChangesAsync();
+
+            var coursePenaltys = new List<CoursePenalty>();
+            var courses = await _context.Courses.ToListAsync();
+            foreach (var course in courses)
+            {
+                foreach (var courseToAdd in courses)
                 {
-                    if (editedCp.CourseWithPenalty.ID == cp.CourseWithPenaltyID)
+                    if (!(coursePenaltys.Any(cp => cp.CourseID == course.ID && cp.CourseWithPenaltyID == courseToAdd.ID) ||
+                        coursePenaltys.Any(cp => cp.CourseID == courseToAdd.ID && cp.CourseWithPenaltyID == course.ID)))
                     {
-                        if(editedCp.PenaltyCount != cp.PenaltyCount)
+                        if (courseToAdd.ID != course.ID)
                         {
-                            cp.PenaltyCount = editedCp.PenaltyCount;
-                            _context.Update(cp);
-                            await _context.SaveChangesAsync();
+                            var penalty = 0;
+                            if (course.PrerequisiteID == courseToAdd.PrerequisiteID)
+                            {
+                                penalty = 1;
+                            }
+                            coursePenaltys.Add(new()
+                            {
+                                Course = course,
+                                CourseID = course.ID,
+                                CourseWithPenaltyID = courseToAdd.ID,
+                                PenaltyCount = penalty
+                            });
                         }
                     }
                 }
-                //var CoursPenalty = _context.Courses.First(c => c.ID == cp.CourseWithPenaltyID);
-                //viewModel.Add(new()
-                //{
-                //    CourseWithPenalty = CoursPenalty,
-                //    PenaltyCount = cp.PenaltyCount,
-                //});
             }
-            // ViewData["Course"] = await _context.Courses.FirstAsync(c => c.ID == id);
+            await _context.CoursePenalty.AddRangeAsync(coursePenaltys);
+            await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
     }

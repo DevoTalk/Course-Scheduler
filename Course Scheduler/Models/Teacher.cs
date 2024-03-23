@@ -9,9 +9,7 @@ namespace Course_Scheduler.Models
         {
             PreferredTime = new List<ClassTime>();
         }
-
         public string Name { get; set; }
-        
         public List<ClassTime> PreferredTime{ get; set; }
     }
 }

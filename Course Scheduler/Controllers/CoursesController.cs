@@ -101,16 +101,16 @@ namespace Course_Scheduler.Controllers
                     });
                 }
                 await _context.SaveChangesAsync();
-                var courses = await _context.Courses.ToListAsync();
-                foreach (var course in courses) {
-                    _context.CoursePenalty.Add(new()
-                    {
-                        Course = courseAndTeachers.Course,
-                        CourseWithPenaltyID = course.ID,
-                        PenaltyCount = 0
-                    });
-                }
-                await _context.SaveChangesAsync();
+                //var courses = await _context.Courses.ToListAsync();
+                //foreach (var course in courses) {
+                //    _context.CoursePenalty.Add(new()
+                //    {
+                //        Course = courseAndTeachers.Course,
+                //        CourseWithPenaltyID = course.ID,
+                //        PenaltyCount = 0
+                //    });
+                //}
+                //await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
             ViewData["RequiredCourse"] = _context.Courses.ToList();
@@ -233,6 +233,11 @@ namespace Course_Scheduler.Controllers
                     _context.Remove(item);
                 }
 
+                var coursePenalty = _context.CoursePenalty.Where(c => c.CourseID == id || c.CourseWithPenaltyID == id);
+                foreach (var item in coursePenalty)
+                {
+                    _context.Remove(item);
+                }
                 _context.Courses.Remove(course);
                 
             }

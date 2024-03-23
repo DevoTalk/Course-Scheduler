@@ -2,8 +2,6 @@
 {
     public enum ClassTime
     {
-        
-     
         SaturdayT1, SaturdayT2, SaturdayT3, SaturdayT4,
         SunDayT1, SunDayT2, SunDayT3, SunDayT4,
         MondayT1, MondayT2, MondayT3, MondayT4,
