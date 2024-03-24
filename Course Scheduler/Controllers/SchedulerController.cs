@@ -1,4 +1,5 @@
 ﻿using Course_Scheduler.Data;
+using Course_Scheduler.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Course_Scheduler.Controllers
@@ -14,6 +15,12 @@ namespace Course_Scheduler.Controllers
 
         public IActionResult Index()
         {
+            var courses = _context.Courses.ToList();
+            var courseToTeachers = _context.CourseToTeacher.ToList();
+            var coursePenaltys = _context.CoursePenalty.ToList();
+            var teachers = _context.Teacher.ToList();
+            GeneticAlgorithm ga = new(courses,courseToTeachers,coursePenaltys,teachers);
+            var a =ga.GenratePopulation(5);
             return View();
         }
 
