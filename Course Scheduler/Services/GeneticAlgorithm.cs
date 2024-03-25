@@ -19,7 +19,7 @@ public class GeneticAlgorithm
     public List<CoursePenalty> CoursePenalties { get; set; }
     public List<Teacher> Teachers { get; set; }
 
-    public List<Schedule> GenratePopulation(int Count = 100)
+    public List<Schedule> GeneratePopulation(int Count = 100)
     {
         var schedules = new List<Schedule>();
         for (int i = 0; i <= Count; i++)

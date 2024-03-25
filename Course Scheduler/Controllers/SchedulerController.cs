@@ -20,7 +20,7 @@ namespace Course_Scheduler.Controllers
             var coursePenaltys = _context.CoursePenalty.ToList();
             var teachers = _context.Teacher.ToList();
             GeneticAlgorithm ga = new(courses,courseToTeachers,coursePenaltys,teachers);
-            var a =ga.GenratePopulation(5);
+            var a =ga.GeneratePopulation(5);
             return View();
         }
 
