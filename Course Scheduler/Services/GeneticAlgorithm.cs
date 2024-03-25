@@ -1,5 +1,4 @@
 ﻿using Course_Scheduler.Models;
-using Course_Scheduler.Models.Enum;
 
 namespace Course_Scheduler.Services;
 
@@ -77,23 +76,23 @@ public class GeneticAlgorithm
         {
             var penalty = 0;
             var calculatedCoursePenalty = new List<CalculatedCoursePenalty>();
-            foreach (var item in schedule.CourseTeacherClassTime)
+            foreach (var CTT1 in schedule.CourseTeacherClassTime)
             {
-                foreach (var item2 in schedule.CourseTeacherClassTime)
+                foreach (var CTT2 in schedule.CourseTeacherClassTime)
                 {
-                    if (item != item2)
+                    if (CTT1 != CTT2)
                     {
-                        foreach (var ct in item.ClassTime)
+                        foreach (var ct in CTT1.ClassTime)
                         {
-                            foreach (var ct2 in item2.ClassTime)
+                            foreach (var ct2 in CTT2.ClassTime)
                             {
                                 if (ct == ct2)
                                 {
-                                    if (item.Course.PrerequisiteID == item2.Course.PrerequisiteID)
+                                    if (CTT1.Course.PrerequisiteID == CTT2.Course.PrerequisiteID)
                                     {
                                         if (!calculatedCoursePenalty
-                                            .Any(c => c.Course1 == item.Course && c.Course2 == item2.Course ||
-                                                c.Course1 == item2.Course && c.Course2 == item.Course))
+                                            .Any(c => c.Course1 == CTT1.Course && c.Course2 == CTT2.Course ||
+                                                c.Course1 == CTT2.Course && c.Course2 == CTT1.Course))
                                         {
                                             penalty += CoursePenalties.First(
                                                 c => c.CourseID == CTT1.Course.ID && c.CourseWithPenaltyID == CTT2.Course.ID ||
@@ -101,8 +100,8 @@ public class GeneticAlgorithm
 
                                             calculatedCoursePenalty.Add(new()
                                             {
-                                                Course1 = item.Course,
-                                                Course2 = item2.Course,
+                                                Course1 = CTT1.Course,
+                                                Course2 = CTT2.Course,
                                             });
                                         }
                                     }
