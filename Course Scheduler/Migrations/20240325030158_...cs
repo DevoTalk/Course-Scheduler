@@ -5,26 +5,11 @@
 namespace Course_Scheduler.Migrations
 {
     /// <inheritdoc />
-    public partial class addcoursepenalty8 : Migration
+    public partial class _ : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.CreateTable(
-                name: "CoursePenalty",
-                columns: table => new
-                {
-                    ID = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    asdfasdfadsf = table.Column<int>(type: "int", nullable: false),
-                    RelatedCourasdfasdfasdfasdfse = table.Column<int>(type: "int", nullable: false),
-                    PenaltyCount = table.Column<int>(type: "int", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_CoursePenalty", x => x.ID);
-                });
-
             migrationBuilder.CreateTable(
                 name: "Courses",
                 columns: table => new
@@ -32,7 +17,8 @@ namespace Course_Scheduler.Migrations
                     ID = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    PrerequisiteID = table.Column<int>(type: "int", nullable: true)
+                    PrerequisiteID = table.Column<int>(type: "int", nullable: true),
+                    Credits = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -59,14 +45,34 @@ namespace Course_Scheduler.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "CoursePenalty",
+                columns: table => new
+                {
+                    ID = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    CourseID = table.Column<int>(type: "int", nullable: false),
+                    CourseWithPenaltyID = table.Column<int>(type: "int", nullable: false),
+                    PenaltyCount = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_CoursePenalty", x => x.ID);
+                    table.ForeignKey(
+                        name: "FK_CoursePenalty_Courses_CourseID",
+                        column: x => x.CourseID,
+                        principalTable: "Courses",
+                        principalColumn: "ID",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "CourseToTeacher",
                 columns: table => new
                 {
                     ID = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     CourseID = table.Column<int>(type: "int", nullable: false),
-                    TeacherID = table.Column<int>(type: "int", nullable: false),
-                    ClassTime = table.Column<int>(type: "int", nullable: false)
+                    TeacherID = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -84,6 +90,11 @@ namespace Course_Scheduler.Migrations
                         principalColumn: "ID",
                         onDelete: ReferentialAction.Cascade);
                 });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_CoursePenalty_CourseID",
+                table: "CoursePenalty",
+                column: "CourseID");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Courses_PrerequisiteID",

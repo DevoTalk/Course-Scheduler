@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Course_Scheduler.Migrations
 {
     [DbContext(typeof(Course_SchedulerContext))]
-    [Migration("20240325022519_add-course-credits")]
-    partial class addcoursecredits
+    [Migration("20240325034214_test")]
+    partial class test
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -81,9 +81,6 @@ namespace Course_Scheduler.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"));
-
-                    b.Property<int>("ClassTime")
-                        .HasColumnType("int");
 
                     b.Property<int>("CourseID")
                         .HasColumnType("int");

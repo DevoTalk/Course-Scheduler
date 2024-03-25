@@ -79,9 +79,6 @@ namespace Course_Scheduler.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"));
 
-                    b.Property<int>("ClassTime")
-                        .HasColumnType("int");
-
                     b.Property<int>("CourseID")
                         .HasColumnType("int");
 
