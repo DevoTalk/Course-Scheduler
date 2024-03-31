@@ -25,11 +25,6 @@ namespace Course_Scheduler.Controllers
             return View();
         }
 
-        public IActionResult TopologicalSort()
-        {
-            var courses = _context.Courses.ToList();
-            
-            return View();
-        }
+       
     }
 }

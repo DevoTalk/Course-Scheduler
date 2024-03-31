@@ -68,59 +68,20 @@ public class GeneticAlgorithm
         }
         return penalty;
     }
-    public List<int> CalculatePenalty(List<Schedule> schedules)
-    {
-        var penaltys = new List<int>();
-
-        foreach (var schedule in schedules)
-        {
-            var penalty = 0;
-            var calculatedCoursePenalty = new List<CalculatedCoursePenalty>();
-            foreach (var CTT1 in schedule.CourseTeacherClassTime)
-            {
-                foreach (var CTT2 in schedule.CourseTeacherClassTime)
-                {
-                    if (CTT1 != CTT2)
-                    {
-                        foreach (var ct in CTT1.ClassTime)
-                        {
-                            foreach (var ct2 in CTT2.ClassTime)
-                            {
-                                if (ct == ct2)
-                                {
-                                    if (CTT1.Course.PrerequisiteID == CTT2.Course.PrerequisiteID)
-                                    {
-                                        if (!calculatedCoursePenalty
-                                            .Any(c => c.Course1 == CTT1.Course && c.Course2 == CTT2.Course ||
-                                                c.Course1 == CTT2.Course && c.Course2 == CTT1.Course))
-                                        {
-                                            penalty += CoursePenalties.First(
-                                                c => c.CourseID == CTT1.Course.ID && c.CourseWithPenaltyID == CTT2.Course.ID ||
-                                                c.CourseID == CTT2.Course.ID && c.CourseWithPenaltyID == CTT1.Course.ID).PenaltyCount;
-
-                                            calculatedCoursePenalty.Add(new()
-                                            {
-                                                Course1 = CTT1.Course,
-                                                Course2 = CTT2.Course,
-                                            });
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            penaltys.Add(penalty);
-        }
-        return penaltys;
-    }
+    
     public List<Schedule> GeneratePopulation(int Count = 100)
     {
         var schedules = new List<Schedule>();
-        for (int i = 0; i <= Count; i++)
+        var count = 0;
+        var unhealtyCount = 0;
+        while (count < Count) 
         {
+            if (unhealtyCount > Count * 10)
+            {
+                break;
+            }
             var schedule = new Schedule();
+            bool isHealthy = true;
             var courentCourseList = new List<Course>();
             courentCourseList.AddRange(Courses);
             var courentTeacherList = new List<Teacher>();
@@ -149,13 +110,14 @@ public class GeneticAlgorithm
                     }
                 }
                 var teacherOfThisCourse = CourseToTeacher.Where(ct => ct.CourseID == CTT.Course.ID).ToList();
+                var selectedTeachersBefore = new List<Teacher>();
                 while (true)
                 {
                     if (teacherOfThisCourse.Count() != 0)
                     {
                         var teacherId = teacherOfThisCourse[rnd.Next(teacherOfThisCourse.Count())].TeacherID;
                         var teacher = courentTeacherList.First(t => t.ID == teacherId);
-                        if (teacher.PreferredTime.Count*2 >= CTT.Course.Credits)
+                        if (teacher.PreferredTime.Count * 2 >= CTT.Course.Credits)
                         {
                             var courseCredits = CTT.Course.Credits;
                             while (courseCredits > 0)
@@ -198,12 +160,25 @@ public class GeneticAlgorithm
                         }
                         teacherOfThisCourse.Remove(teacherOfThisCourse.First(tc => tc.TeacherID == teacherId));
                     }
+                    else
+                    {
+                        isHealthy = false;
+                        break;
+                    }
                 }
                 schedule.CourseTeacherClassTime.Add(CTT);
             }
-            var penalty = CalculatePenalty(schedule);
-            schedule.TotalPenalty = penalty;
-            schedules.Add(schedule);
+            if (isHealthy)
+            {
+                var penalty = CalculatePenalty(schedule);
+                schedule.TotalPenalty = penalty;
+                schedules.Add(schedule);
+                count++;
+            }
+            else 
+            {
+                unhealtyCount++;
+            }
         }
         return schedules;
     }
