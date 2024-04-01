@@ -3,8 +3,11 @@ using Microsoft.Extensions.DependencyInjection;
 using Course_Scheduler.Data;
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<Course_SchedulerContext>(options =>
-    options.UseSqlServer(
-        builder.Configuration.GetConnectionString("Course_SchedulerContext")));
+    //options.UseSqlServer(
+    //    builder.Configuration.GetConnectionString("Course_SchedulerContext"))
+    options.UseSqlite(
+        builder.Configuration.GetConnectionString("localSqlLiteDb"))
+    );
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();

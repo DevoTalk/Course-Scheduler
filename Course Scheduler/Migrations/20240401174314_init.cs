@@ -5,7 +5,7 @@
 namespace Course_Scheduler.Migrations
 {
     /// <inheritdoc />
-    public partial class _ : Migration
+    public partial class init : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -14,11 +14,11 @@ namespace Course_Scheduler.Migrations
                 name: "Courses",
                 columns: table => new
                 {
-                    ID = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    PrerequisiteID = table.Column<int>(type: "int", nullable: true),
-                    Credits = table.Column<int>(type: "int", nullable: false)
+                    ID = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    Name = table.Column<string>(type: "TEXT", nullable: false),
+                    PrerequisiteID = table.Column<int>(type: "INTEGER", nullable: true),
+                    Credits = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -34,10 +34,10 @@ namespace Course_Scheduler.Migrations
                 name: "Teacher",
                 columns: table => new
                 {
-                    ID = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    PreferredTime = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    ID = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    Name = table.Column<string>(type: "TEXT", nullable: false),
+                    PreferredTime = table.Column<string>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -48,11 +48,11 @@ namespace Course_Scheduler.Migrations
                 name: "CoursePenalty",
                 columns: table => new
                 {
-                    ID = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    CourseID = table.Column<int>(type: "int", nullable: false),
-                    CourseWithPenaltyID = table.Column<int>(type: "int", nullable: false),
-                    PenaltyCount = table.Column<int>(type: "int", nullable: false)
+                    ID = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    CourseID = table.Column<int>(type: "INTEGER", nullable: false),
+                    CourseWithPenaltyID = table.Column<int>(type: "INTEGER", nullable: false),
+                    PenaltyCount = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -69,10 +69,10 @@ namespace Course_Scheduler.Migrations
                 name: "CourseToTeacher",
                 columns: table => new
                 {
-                    ID = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    CourseID = table.Column<int>(type: "int", nullable: false),
-                    TeacherID = table.Column<int>(type: "int", nullable: false)
+                    ID = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    CourseID = table.Column<int>(type: "INTEGER", nullable: false),
+                    TeacherID = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
