@@ -24,13 +24,13 @@
                 <p class="text-danger">@Model[i].TotalPenalty</p>
             </div>
         </div>
-        <div class="row schedule-details" id="schedule-@i" style="display:none;">
-            <table class="table">
+        <div class="schedule-details" id="schedule-@i" style="display:none;">
+            <table class="table" id="schedule-table-@i">
                 <thead>
                     <tr>
-                        <th>Class Name</th>
-                        <th>Teacher Name</th>
-                        <th>Class Times</th>
+                        <th onclick="sortTable('@i', 0)">Class Name</th>
+                        <th onclick="sortTable('@i', 1)">Teacher Name</th>
+                        <th onclick="sortTable('@i', 2)">Class Times</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -58,6 +58,40 @@
         function toggleSchedule(id) {
             var schedule = document.getElementById("schedule-" + id);
             schedule.style.display = (schedule.style.display == "none") ? "block" : "none";
+        }
+
+        function sortTable(tableId, columnIndex) {
+            var table, rows, switching, i, x, y, shouldSwitch;
+            table = document.getElementById("schedule-table-" + tableId);
+            switching = true;
+            while (switching) {
+                switching = false;
+                rows = table.rows;
+                for (i = 1; i < (rows.length - 1); i++) {
+                    shouldSwitch = false;
+                    x = rows[i].getElementsByTagName("td")[columnIndex];
+                    y = rows[i + 1].getElementsByTagName("td")[columnIndex];
+
+                    // For ClassTime column, parse the time strings for comparison
+                    if (columnIndex == 2) {
+                        var xClassTime = x.innerText.trim().split(' ')[0];
+                        var yClassTime = y.innerText.trim().split(' ')[0];
+                        if (xClassTime > yClassTime) {
+                            shouldSwitch = true;
+                            break;
+                        }
+                    } else {
+                        if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+                            shouldSwitch = true;
+                            break;
+                        }
+                    }
+                }
+                if (shouldSwitch) {
+                    rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+                    switching = true;
+                }
+            }
         }
     </script>
 }

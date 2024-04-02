@@ -178,61 +178,69 @@ public class GeneticAlgorithm
                     }
                 }
                 var teacherOfThisCourse = CourseToTeacher.Where(ct => ct.CourseID == CTT.Course.ID).ToList();
-                var selectedTeachersBefore = new List<Teacher>();
-                while (true)
-                {
-                    if (teacherOfThisCourse.Count() != 0)
-                    {
-                        var teacherId = teacherOfThisCourse[rnd.Next(teacherOfThisCourse.Count())].TeacherID;
-                        var teacher = courentTeacherList.First(t => t.ID == teacherId);
-                        if (teacher.PreferredTime.Count * 2 >= CTT.Course.Credits)
-                        {
-                            var courseCredits = CTT.Course.Credits;
-                            while (courseCredits > 0)
-                            {
-                                var time = teacher.PreferredTime[rnd.Next(teacher.PreferredTime.Count())];
-                                courentTeacherList.First(t => t == teacher).PreferredTime.Remove(time);
-                                CTT.Teacher = teacher;
-                                if (courseCredits == 1)
-                                {
+                //var selectedTeachersBefore = new List<Teacher>();
 
-                                    if (rnd.NextDouble() > 0.5)
+                for (int i = 0; i <= CTT.Course.CountOfClass; i++)
+                {
+                    while (true)
+                    {
+                        if (teacherOfThisCourse.Count() != 0)
+                        {
+                            var teacherId = teacherOfThisCourse[rnd.Next(teacherOfThisCourse.Count())].TeacherID;
+                            var teacher = courentTeacherList.First(t => t.ID == teacherId);
+                            if (teacher.PreferredTime.Count * 2 >= CTT.Course.Credits)
+                            {
+                                var courseCredits = CTT.Course.Credits;
+                                while (courseCredits > 0)
+                                {
+                                    var time = teacher.PreferredTime[rnd.Next(teacher.PreferredTime.Count())];
+                                    courentTeacherList.First(t => t == teacher).PreferredTime.Remove(time);
+                                    CTT.Teacher = teacher;
+                                    if (courseCredits == 1)
                                     {
-                                        CTT.ClassTime.Add(new()
+
+                                        if (rnd.NextDouble() > 0.5)
                                         {
-                                            ClassTime = time,
-                                            EvenOdd = EvenOdd.odd
-                                        });
+                                            CTT.ClassTime.Add(new()
+                                            {
+                                                ClassTime = time,
+                                                EvenOdd = EvenOdd.odd
+                                            });
+                                        }
+                                        else
+                                        {
+                                            CTT.ClassTime.Add(new()
+                                            {
+                                                ClassTime = time,
+                                                EvenOdd = EvenOdd.even
+                                            });
+                                        }
                                     }
                                     else
                                     {
                                         CTT.ClassTime.Add(new()
                                         {
                                             ClassTime = time,
-                                            EvenOdd = EvenOdd.even
+                                            EvenOdd = EvenOdd.everyWeek
                                         });
                                     }
-                                }
-                                else
-                                {
-                                    CTT.ClassTime.Add(new()
-                                    {
-                                        ClassTime = time,
-                                        EvenOdd = EvenOdd.everyWeek
-                                    });
-                                }
-                                courseCredits -= 2;
+                                    courseCredits -= 2;
 
+                                }
+                                break;
                             }
+                            else
+                            {
+                                teacherOfThisCourse.Remove(teacherOfThisCourse.First(tc => tc.TeacherID == teacherId));
+                            }
+                        }
+                        else
+                        {
+                            isHealthy = false;
                             break;
                         }
-                        teacherOfThisCourse.Remove(teacherOfThisCourse.First(tc => tc.TeacherID == teacherId));
                     }
-                    else
-                    {
-                        isHealthy = false;
-                        break;
-                    }
+
                 }
                 schedule.CourseTeacherClassTimes.Add(CTT);
             }

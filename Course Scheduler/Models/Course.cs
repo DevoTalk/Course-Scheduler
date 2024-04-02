@@ -7,6 +7,7 @@ namespace Course_Scheduler.Models
         public string Name { get; set; }
         public int? PrerequisiteID { get; set; }
         public Course? Prerequisite { get; set; }
-        public int Credits { get; set; }
+        public int Credits { get; set; } = 3;
+        public int CountOfClass { get; set; } = 1;
     }
 }
