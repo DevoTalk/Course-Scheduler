@@ -1,35 +1,98 @@
 ﻿using Course_Scheduler.Models;
+using Course_Scheduler.Models.Enum;
+using System.Collections.Generic;
 
 namespace Course_Scheduler.Services;
 
 public class GeneticAlgorithm
 {
+    #region ctor
+
+    public List<Course> Courses { get; set; }
+    public List<CourseToTeacher> CourseToTeacher { get; set; }
+    public List<CoursePenalty> CoursePenalties { get; set; }
+    public List<Teacher> Teachers { get; set; }
     public GeneticAlgorithm(List<Course> courses, List<CourseToTeacher> courseToTeacher, List<CoursePenalty> coursePenalties, List<Teacher> teachers)
     {
         Courses = courses;
         CourseToTeacher = courseToTeacher;
         CoursePenalties = coursePenalties;
         Teachers = teachers;
-        
+
     }
-
-    public List<Course> Courses { get; set; }
-    public List<CourseToTeacher> CourseToTeacher { get; set; }
-    public List<CoursePenalty> CoursePenalties { get; set; }
-    public List<Teacher> Teachers { get; set; }
-
+    #endregion
+    #region model and servies
     private class CalculatedCoursePenalty
     {
         public Course Course1 { get; set; }
         public Course Course2 { get; set; }
     }
+    private class ClassTimeComparer : IComparer<ClassTime>
+    {
+        public int Compare(ClassTime x, ClassTime y)
+        {
+            return x.ToString().CompareTo(y.ToString());
+        }
+    }
+    static bool AreOnSameDay(ClassTime classTime1, ClassTime classTime2)
+    {
+        // Extract day from enum values
+        var day1 = classTime1.ToString().Substring(0, classTime1.ToString().IndexOf('T'));
+        var day2 = classTime2.ToString().Substring(0, classTime2.ToString().IndexOf('T'));
+
+        // Compare days
+        return day1 == day2;
+    }
+    #endregion
+
+    #region Penalty
     public int CalculatePenalty(Schedule schedule)
     {
         var penalty = 0;
-        var calculatedCoursePenalty = new List<CalculatedCoursePenalty>();
-        foreach (var CTT1 in schedule.CourseTeacherClassTime)
+        penalty += PenaltyOfOverlay(schedule.CourseTeacherClassTimes);
+        penalty += PenaltyOfTeacher(schedule.CourseTeacherClassTimes);
+        return penalty;
+    }
+    private int PenaltyOfTeacher(List<CourseTeacherClassTime> CourseTeacherClassTimes)
+    {
+        var penalties = new Dictionary<Teacher, int>();
+
+        foreach (var course in CourseTeacherClassTimes)
         {
-            foreach (var CTT2 in schedule.CourseTeacherClassTime)
+            var teacher = course.Teacher;
+            if (!penalties.ContainsKey(teacher))
+            {
+                penalties[teacher] = 0;
+            }
+
+            var classTimes = course.ClassTime.Select(ct => ct.ClassTime).OrderBy(ct => ct).ToList();
+            for (int i = 0; i < classTimes.Count - 1; i++)
+            {
+                var currentClass = classTimes[i];
+                var nextClass = classTimes[i + 1];
+
+                // Check if classes are not consecutive and on the same day
+                if (nextClass - currentClass > 1 && AreOnSameDay(currentClass, nextClass))
+                {
+                    penalties[teacher]++;
+                }
+            }
+        }
+
+        var totalPenalty = 0;
+        foreach (var item in penalties)
+        {
+            totalPenalty += item.Value;
+        }
+        return totalPenalty;
+    }
+    private int PenaltyOfOverlay(List<CourseTeacherClassTime> CourseTeacherClassTimes)
+    {
+        var penalty = 0;
+        var calculatedCoursePenalty = new List<CalculatedCoursePenalty>();
+        foreach (var CTT1 in CourseTeacherClassTimes)
+        {
+            foreach (var CTT2 in CourseTeacherClassTimes)
             {
                 if (CTT1 != CTT2)
                 {
@@ -68,16 +131,21 @@ public class GeneticAlgorithm
         }
         return penalty;
     }
-    
+    #endregion
+
     public List<Schedule> GeneratePopulation(int Count = 100)
     {
         var schedules = new List<Schedule>();
         var count = 0;
         var unhealtyCount = 0;
-        while (count < Count) 
+        while (count < Count)
         {
             if (unhealtyCount > Count * 10)
             {
+                if (count != 0)
+                {
+                    return schedules;
+                }
                 break;
             }
             var schedule = new Schedule();
@@ -166,7 +234,7 @@ public class GeneticAlgorithm
                         break;
                     }
                 }
-                schedule.CourseTeacherClassTime.Add(CTT);
+                schedule.CourseTeacherClassTimes.Add(CTT);
             }
             if (isHealthy)
             {
@@ -175,7 +243,7 @@ public class GeneticAlgorithm
                 schedules.Add(schedule);
                 count++;
             }
-            else 
+            else
             {
                 unhealtyCount++;
             }

@@ -7,9 +7,9 @@ namespace Course_Scheduler.Models
     {
         public Schedule()
         {
-            this.CourseTeacherClassTime = new();
+            this.CourseTeacherClassTimes = new();
         }
-        public List<CourseTeacherClassTime> CourseTeacherClassTime { get; set; }
+        public List<CourseTeacherClassTime> CourseTeacherClassTimes { get; set; }
         public int TotalPenalty { get; set; }
     }
     public class CourseTeacherClassTime

@@ -15,14 +15,18 @@ namespace Course_Scheduler.Controllers
 
         public IActionResult Index()
         {
+            return View();
+        }
+        public IActionResult GeneticAlgorithm(int Count = 100) 
+        {
             var courses = _context.Courses.ToList();
             var courseToTeachers = _context.CourseToTeacher.ToList();
             var coursePenaltys = _context.CoursePenalty.ToList();
             var teachers = _context.Teacher.ToList();
-            GeneticAlgorithm ga = new(courses,courseToTeachers,coursePenaltys,teachers);
-            var a = ga.GeneratePopulation();
+            GeneticAlgorithm ga = new(courses, courseToTeachers, coursePenaltys, teachers);
+            var a = ga.GeneratePopulation(Count);
             a = a.OrderBy(s => s.TotalPenalty).ToList();
-            return View();
+            return View("Schedule",a);
         }
 
        

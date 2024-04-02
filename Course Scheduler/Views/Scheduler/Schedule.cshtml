@@ -1,0 +1,63 @@
+﻿@model List<Schedule>
+
+@{
+    ViewData["Title"] = "Schedule";
+}
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-6">
+            <h2>Schedule Index</h2>
+        </div>
+        <div class="col-md-6">
+            <h2>Penalty Count</h2>
+        </div>
+    </div>
+
+    @for (int i = 0; i < Model.Count(); i++)
+    {
+        <div class="row schedule-item">
+            <div class="col-md-6">
+                <button class="btn btn-primary" onclick="toggleSchedule(@i)">@i</button>
+            </div>
+            <div class="col-md-6">
+                <p class="text-danger">@Model[i].TotalPenalty</p>
+            </div>
+        </div>
+        <div class="row schedule-details" id="schedule-@i" style="display:none;">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Class Name</th>
+                        <th>Teacher Name</th>
+                        <th>Class Times</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model[i].CourseTeacherClassTimes)
+                    {
+                        <tr>
+                            <td>@item.Course.Name</td>
+                            <td>@item.Teacher.Name</td>
+                            <td>
+                                @foreach (var time in item.ClassTime)
+                                {
+                                    <p>@time.ClassTime.ToString()  @time.EvenOdd</p>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        function toggleSchedule(id) {
+            var schedule = document.getElementById("schedule-" + id);
+            schedule.style.display = (schedule.style.display == "none") ? "block" : "none";
+        }
+    </script>
+}
