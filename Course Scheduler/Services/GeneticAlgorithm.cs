@@ -4,6 +4,31 @@ using System.Collections.Generic;
 
 namespace Course_Scheduler.Services;
 
+
+public class CoustomTeacherWithEvenOddClassTime : Base
+{
+    public CoustomTeacherWithEvenOddClassTime()
+    {
+        PreferredTime = new List<CoustomTime>();
+    }
+    public string Name { get; set; }
+    public List<CoustomTime> PreferredTime { get; set; }
+}
+public class CoustomTime
+{
+    public CoustomTime()
+    {
+        EvenOdd = new();
+    }
+    public ClassTime ClassTime { get; set; }
+    public List<CoustomEvenOdd>? EvenOdd { get; set; }
+}
+public enum CoustomEvenOdd
+{
+    even,
+    odd,
+    everyWeek,
+}
 public class GeneticAlgorithm
 {
     #region ctor
@@ -142,25 +167,32 @@ public class GeneticAlgorithm
         {
             if (unhealtyCount > Count * 10)
             {
-                if (count != 0)
-                {
-                    return schedules;
-                }
                 break;
             }
             var schedule = new Schedule();
             bool isHealthy = true;
             var courentCourseList = new List<Course>();
             courentCourseList.AddRange(Courses);
-            var courentTeacherList = new List<Teacher>();
+            var courentTeacherList = new List<CoustomTeacherWithEvenOddClassTime>();
             foreach (var techer in Teachers)
             {
-                var t = new Teacher()
+                var t = new CoustomTeacherWithEvenOddClassTime()
                 {
                     ID = techer.ID,
                     Name = techer.Name,
                 };
-                t.PreferredTime.AddRange(techer.PreferredTime);
+                foreach (var time in techer.PreferredTime)
+                {
+                    var coustomEvenOdd = new List<CoustomEvenOdd>
+                    {
+                        CoustomEvenOdd.everyWeek
+                    };
+                    t.PreferredTime.Add(new()
+                    {
+                        ClassTime = time,
+                        EvenOdd = coustomEvenOdd,
+                    });
+                }
                 courentTeacherList.Add(t);
             }
             for (int j = 1; j <= Courses.Count(); j++)
@@ -194,38 +226,77 @@ public class GeneticAlgorithm
                                 while (courseCredits > 0)
                                 {
                                     var time = teacher.PreferredTime[rnd.Next(teacher.PreferredTime.Count())];
-                                    courentTeacherList.First(t => t == teacher).PreferredTime.Remove(time);
-                                    CTT.Teacher = teacher;
-                                    if (courseCredits == 1)
+                                    if (time.EvenOdd.Count() != 0)
                                     {
 
-                                        if (rnd.NextDouble() > 0.5)
+
+                                        CTT.Teacher = Teachers.First(t => t.ID == teacherId);
+                                        if (courseCredits == 1)
                                         {
-                                            CTT.ClassTime.Add(new()
+                                            if (time.EvenOdd.Contains(CoustomEvenOdd.everyWeek))
                                             {
-                                                ClassTime = time,
-                                                EvenOdd = EvenOdd.odd
-                                            });
+                                                if (rnd.NextDouble() > 0.5)
+                                                {
+                                                    CTT.ClassTime.Add(new()
+                                                    {
+                                                        ClassTime = time.ClassTime,
+                                                        EvenOdd = EvenOdd.odd
+                                                    });
+                                                    courentTeacherList.First(t => t == teacher).PreferredTime.First(t => t.ClassTime == time.ClassTime).EvenOdd.Clear();
+                                                    courentTeacherList.First(t => t == teacher).PreferredTime.First(t => t.ClassTime == time.ClassTime).EvenOdd.Add(CoustomEvenOdd.even);
+                                                }
+                                                else
+                                                {
+                                                    CTT.ClassTime.Add(new()
+                                                    {
+                                                        ClassTime = time.ClassTime,
+                                                        EvenOdd = EvenOdd.even
+                                                    });
+                                                    courentTeacherList.First(t => t == teacher).PreferredTime.First(t => t.ClassTime == time.ClassTime).EvenOdd.Clear();
+                                                    courentTeacherList.First(t => t == teacher).PreferredTime.First(t => t.ClassTime == time.ClassTime).EvenOdd.Add(CoustomEvenOdd.odd);
+                                                }
+                                                courseCredits -= 1;
+                                            }
+                                            else if (time.EvenOdd.Contains(CoustomEvenOdd.odd))
+                                            {
+                                                CTT.ClassTime.Add(new()
+                                                {
+                                                    ClassTime = time.ClassTime,
+                                                    EvenOdd = EvenOdd.odd
+                                                });
+                                                courentTeacherList.First(t => t == teacher).PreferredTime.First(t => t.ClassTime == time.ClassTime).EvenOdd.Clear();
+                                                courseCredits -= 1;
+
+                                            }
+                                            else if (time.EvenOdd.Contains(CoustomEvenOdd.even))
+                                            {
+                                                CTT.ClassTime.Add(new()
+                                                {
+                                                    ClassTime = time.ClassTime,
+                                                    EvenOdd = EvenOdd.even
+                                                });
+                                                courentTeacherList.First(t => t == teacher).PreferredTime.First(t => t.ClassTime == time.ClassTime).EvenOdd.Clear();
+                                                courseCredits -= 1;
+                                            }
                                         }
                                         else
                                         {
-                                            CTT.ClassTime.Add(new()
+                                            if (time.EvenOdd.Contains(CoustomEvenOdd.everyWeek))
                                             {
-                                                ClassTime = time,
-                                                EvenOdd = EvenOdd.even
-                                            });
+                                                CTT.ClassTime.Add(new()
+                                                {
+                                                    ClassTime = time.ClassTime,
+                                                    EvenOdd = EvenOdd.everyWeek
+                                                });
+                                                teacher.PreferredTime.Remove(time);
+                                                courseCredits -= 2;
+                                            }
                                         }
                                     }
                                     else
                                     {
-                                        CTT.ClassTime.Add(new()
-                                        {
-                                            ClassTime = time,
-                                            EvenOdd = EvenOdd.everyWeek
-                                        });
+                                        teacher.PreferredTime.Remove(time);
                                     }
-                                    courseCredits -= 2;
-
                                 }
                                 break;
                             }

@@ -23,15 +23,5 @@ namespace Course_Scheduler.Models
         public List<EvenOddClassTime> ClassTime { get; set; }
 
     }
-    public class EvenOddClassTime
-    {
-        public ClassTime ClassTime { get; set; }
-        public EvenOdd? EvenOdd { get; set; }
-    }
-    public enum EvenOdd
-    {
-        even,
-        odd, 
-        everyWeek
-    }
+    
 }
