@@ -169,6 +169,8 @@ public class GeneticAlgorithm
             {
                 break;
             }
+            #region local var
+
             var schedule = new Schedule();
             bool isHealthy = true;
             var courentCourseList = new List<Course>();
@@ -195,23 +197,15 @@ public class GeneticAlgorithm
                 }
                 courentTeacherList.Add(t);
             }
+            #endregion
             for (int j = 1; j <= Courses.Count(); j++)
             {
                 var CTT = new CourseTeacherClassTime();
-                var rnd = new Random();
-                while (true)
-                {
-                    var index = rnd.Next(Courses.Count());
-                    if (courentCourseList.Any(c => c == Courses[index]))
-                    {
-                        courentCourseList.Remove(Courses[index]);
-                        CTT.Course = Courses[index];
-                        break;
-                    }
-                }
+                CTT.Course = SelectCourse(courentCourseList);
+                
                 var teacherOfThisCourse = CourseToTeacher.Where(ct => ct.CourseID == CTT.Course.ID).ToList();
-                //var selectedTeachersBefore = new List<Teacher>();
 
+                var rnd = new Random();
                 for (int i = 0; i <= CTT.Course.CountOfClass; i++)
                 {
                     while (true)
@@ -328,5 +322,19 @@ public class GeneticAlgorithm
             }
         }
         return schedules;
+    }
+
+    private Course SelectCourse(List<Course> courentCourseList)
+    {
+        var rnd = new Random();
+        while (true)
+        {
+            var index = rnd.Next(Courses.Count());
+            if (courentCourseList.Any(c => c == Courses[index]))
+            {
+                courentCourseList.Remove(Courses[index]);
+                return Courses[index];
+            }
+        }
     }
 }
