@@ -1,6 +1,7 @@
 ﻿using Course_Scheduler.Models;
 using Course_Scheduler.Models.Enum;
 using System.Collections.Generic;
+using System.Text;
 
 namespace Course_Scheduler.Services;
 
@@ -158,7 +159,7 @@ public class GeneticAlgorithm
     }
     #endregion
 
-    public List<Schedule> GeneratePopulation(int Count = 100)
+    public async Task<List<Schedule>> GeneratePopulation(int Count = 100)
     {
         var schedules = new List<Schedule>();
         var count = 0;
@@ -342,7 +343,6 @@ public class GeneticAlgorithm
         }
         return schedules;
     }
-
     private Course SelectCourse(List<Course> courentCourseList)
     {
         var rnd = new Random();
@@ -356,4 +356,5 @@ public class GeneticAlgorithm
             }
         }
     }
+
 }
