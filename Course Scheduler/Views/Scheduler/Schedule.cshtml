@@ -21,9 +21,10 @@
                 <button class="btn btn-primary" onclick="toggleSchedule(@i)">@i</button>
             </div>
             <div class="col-md-6">
-                <p class="text-danger">@Model[i].TotalPenalty</p>
+                <button class="btn btn-danger" onclick="toggleSchedule(@i)">@Model[i].TotalPenalty</button>
             </div>
         </div>
+        <br />
         <div class="schedule-details" id="schedule-@i" style="display:none;">
             <table class="table" id="schedule-table-@i">
                 <thead>
@@ -50,6 +51,7 @@
                 </tbody>
             </table>
         </div>
+        <br />
     }
 </div>
 

@@ -200,13 +200,14 @@ public class GeneticAlgorithm
             #endregion
             for (int j = 1; j <= Courses.Count(); j++)
             {
+
                 var CTT = new CourseTeacherClassTime();
                 CTT.Course = SelectCourse(courentCourseList);
-                
+
                 var teacherOfThisCourse = CourseToTeacher.Where(ct => ct.CourseID == CTT.Course.ID).ToList();
 
                 var rnd = new Random();
-                for (int i = 0; i <= CTT.Course.CountOfClass; i++)
+                for (int i = 0; i < CTT.Course.CountOfClass; i++)
                 {
                     while (true)
                     {
@@ -214,7 +215,28 @@ public class GeneticAlgorithm
                         {
                             var teacherId = teacherOfThisCourse[rnd.Next(teacherOfThisCourse.Count())].TeacherID;
                             var teacher = courentTeacherList.First(t => t.ID == teacherId);
-                            if (teacher.PreferredTime.Count * 2 >= CTT.Course.Credits)
+                            var countOfFreetimeOfTeacherEveryWeek = teacher.PreferredTime.Where(t => t.EvenOdd.Contains(CoustomEvenOdd.everyWeek)).Count();
+                            var countOfFreeTimeOfTecherEvenOdd = teacher.PreferredTime.Where(t => t.EvenOdd.Contains(CoustomEvenOdd.everyWeek)).Count() * 2 +
+                                teacher.PreferredTime.Where(t => t.EvenOdd.Contains(CoustomEvenOdd.even)).Count() +
+                                teacher.PreferredTime.Where(t => t.EvenOdd.Contains(CoustomEvenOdd.odd)).Count();
+                            var countOfClassNeedInEveryWeek = CTT.Course.Credits / 2;
+
+                            var thisTeacherCanTakeCourse = false;
+                            if (countOfFreetimeOfTeacherEveryWeek >= countOfClassNeedInEveryWeek)
+                            {
+                                if (CTT.Course.Credits == 3)
+                                {
+                                    if (countOfFreeTimeOfTecherEvenOdd - 2 >= 1)
+                                    {
+                                        thisTeacherCanTakeCourse = true;
+                                    }
+                                }
+                                else
+                                {
+                                    thisTeacherCanTakeCourse = true;
+                                }
+                            }
+                            if (thisTeacherCanTakeCourse)
                             {
                                 var courseCredits = CTT.Course.Credits;
                                 while (courseCredits > 0)
@@ -222,8 +244,6 @@ public class GeneticAlgorithm
                                     var time = teacher.PreferredTime[rnd.Next(teacher.PreferredTime.Count())];
                                     if (time.EvenOdd.Count() != 0)
                                     {
-
-
                                         CTT.Teacher = Teachers.First(t => t.ID == teacherId);
                                         if (courseCredits == 1)
                                         {
@@ -305,9 +325,8 @@ public class GeneticAlgorithm
                             break;
                         }
                     }
-
+                    schedule.CourseTeacherClassTimes.Add(CTT);
                 }
-                schedule.CourseTeacherClassTimes.Add(CTT);
             }
             if (isHealthy)
             {
