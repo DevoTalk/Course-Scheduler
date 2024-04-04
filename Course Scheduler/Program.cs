@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Course_Scheduler.Data;
+using Course_Scheduler;
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<Course_SchedulerContext>(options =>
     //options.UseSqlServer(

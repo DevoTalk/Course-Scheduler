@@ -15,6 +15,7 @@ namespace Course_Scheduler.Controllers
 
         public IActionResult Index()
         {
+
             return View();
         }
 

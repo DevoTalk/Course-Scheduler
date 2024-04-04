@@ -19,6 +19,7 @@ namespace Course_Scheduler.Controllers
         public CoursesController(Course_SchedulerContext context)
         {
             _context = context;
+
         }
 
         // GET: Courses
