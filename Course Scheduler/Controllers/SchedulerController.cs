@@ -36,6 +36,8 @@ namespace Course_Scheduler.Controllers
             {
                 schedules.AddRange(task.Result);
             }
+            schedules = schedules.Distinct();
+            schedules = schedules.OrderBy(s => s.TotalPenalty).ToList();
             return View("Schedule", schedules);
         }
 
