@@ -1,4 +1,5 @@
-﻿using Course_Scheduler.Data;
+﻿using ClosedXML.Excel;
+using Course_Scheduler.Data;
 using Course_Scheduler.Models;
 using Course_Scheduler.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -38,6 +39,56 @@ namespace Course_Scheduler.Controllers
             }
             schedules = schedules.Distinct();
             schedules = schedules.OrderBy(s => s.TotalPenalty).ToList();
+
+
+
+
+
+
+            // Create a new Excel workbook
+            using (var workbook = new XLWorkbook())
+            {
+                // Add a worksheet to the workbook
+                var worksheet = workbook.Worksheets.Add("My Worksheet");
+
+                // Set headers
+                worksheet.Cell(1, 1).Value = "ID";
+                worksheet.Cell(1, 2).Value = "Penalty";
+                worksheet.Cell(1, 3).Value = "Course name";
+                worksheet.Cell(1, 4).Value = "Teacher name";
+                worksheet.Cell(1, 5).Value = "Times";
+
+                // Populate data
+                int row = 2;
+                int id = 0;
+                foreach (var schedule in schedules)
+                {
+                    worksheet.Row(row).Style.Fill.BackgroundColor = XLColor.LightGray;
+                    worksheet.Cell(row, 1).Value = id;
+                    id++;
+                    worksheet.Cell(row, 2).Value = schedule.TotalPenalty;
+                    row++;
+                    foreach (var CTT in schedule.CourseTeacherClassTimes)
+                    {
+                        worksheet.Cell(row, 3).Value = CTT.Course.Name;
+                        worksheet.Cell(row, 4).Value = CTT.Teacher.Name;
+                        string times = "";
+                        foreach(var time in CTT.ClassTime)
+                        {
+                           times += time.ClassTime.ToString()+ "  " + time.EvenOdd + "  ";
+                        }
+                        worksheet.Cell(row, 5).Value = times;
+                        row++;
+                    }
+                    row++;
+                }
+
+                // Save the workbook
+                workbook.SaveAs("output.xlsx");
+            }
+
+
+            schedules = schedules.Take(10).ToList();
             return View("Schedule", schedules);
         }
 
