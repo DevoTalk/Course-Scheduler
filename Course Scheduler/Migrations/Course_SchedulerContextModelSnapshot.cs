@@ -96,13 +96,31 @@ namespace Course_Scheduler.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("PreferredTime")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
                     b.HasKey("ID");
 
                     b.ToTable("Teacher");
+                });
+
+            modelBuilder.Entity("Course_Scheduler.Models.TeacherClassTimeWithPenalties", b =>
+                {
+                    b.Property<int>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Penalty")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("PreferredTime")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("TeacherId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("ID");
+
+                    b.HasIndex("TeacherId");
+
+                    b.ToTable("TeacherClassTimeWithPenalties");
                 });
 
             modelBuilder.Entity("Course_Scheduler.Models.Course", b =>
@@ -142,6 +160,20 @@ namespace Course_Scheduler.Migrations
                     b.Navigation("Course");
 
                     b.Navigation("Teacher");
+                });
+
+            modelBuilder.Entity("Course_Scheduler.Models.TeacherClassTimeWithPenalties", b =>
+                {
+                    b.HasOne("Course_Scheduler.Models.Teacher", null)
+                        .WithMany("PreferredTime")
+                        .HasForeignKey("TeacherId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Course_Scheduler.Models.Teacher", b =>
+                {
+                    b.Navigation("PreferredTime");
                 });
 #pragma warning restore 612, 618
         }

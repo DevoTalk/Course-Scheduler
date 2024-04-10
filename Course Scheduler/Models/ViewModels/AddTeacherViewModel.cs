@@ -9,6 +9,11 @@ namespace Course_Scheduler.Models.ViewModels
             this.PreferredTime = new();
         }
         public string Name { get; set; }
-        public List<ClassTime> PreferredTime { get; set; }
+        public List<TeacherClassTimeWithPenaltiesViewModel> PreferredTime { get; set; }
+    }
+    public class TeacherClassTimeWithPenaltiesViewModel
+    {
+        public ClassTime PreferredTime { get; set; }
+        public int Penalty { get; set; }
     }
 }

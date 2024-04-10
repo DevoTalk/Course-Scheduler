@@ -16,12 +16,6 @@ namespace Course_Scheduler.Data
         }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<Teacher>().Property(p => p.PreferredTime)
-                .HasConversion(
-                p => string.Join(",", p),
-                p => p.Split(",", StringSplitOptions.RemoveEmptyEntries).Select(l => Enum.Parse<ClassTime>(l)).ToList());
-            
-
             base.OnModelCreating(modelBuilder);
 
         }
@@ -30,5 +24,7 @@ namespace Course_Scheduler.Data
         public DbSet<Course_Scheduler.Models.Course> Courses { get; set; } = default!;
         public DbSet<Course_Scheduler.Models.CourseToTeacher> CourseToTeacher { get; set; } = default!;
         public DbSet<Course_Scheduler.Models.CoursePenalty> CoursePenalty { get; set; } = default!;
+        public DbSet<Course_Scheduler.Models.TeacherClassTimeWithPenalties> TeacherClassTimeWithPenalties { get; set; } = default!;
+
     }
 }

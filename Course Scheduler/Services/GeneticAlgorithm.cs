@@ -184,7 +184,7 @@ public class GeneticAlgorithm
                     ID = techer.ID,
                     Name = techer.Name,
                 };
-                foreach (var time in techer.PreferredTime)
+                foreach (var time in techer.PreferredTimes)
                 {
                     var coustomEvenOdd = new List<CoustomEvenOdd>
                     {
@@ -192,7 +192,7 @@ public class GeneticAlgorithm
                     };
                     t.PreferredTime.Add(new()
                     {
-                        ClassTime = time,
+                        //ClassTime = time,
                         EvenOdd = coustomEvenOdd,
                     });
                 }

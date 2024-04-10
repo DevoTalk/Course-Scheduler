@@ -64,9 +64,20 @@ namespace Course_Scheduler.Controllers
                 var teacher = new Teacher()
                 {
                     Name = teacherViewModel.Name,
-                    PreferredTime = teacherViewModel.PreferredTime,
                 };
                 _context.Add(teacher);
+                await _context.SaveChangesAsync();
+
+                foreach (var pt in teacherViewModel.PreferredTime)
+                {
+                    var teacherPreferredTime = new TeacherClassTimeWithPenalties()
+                    {
+                        Teacher = teacher,
+                        PreferredTime = pt.PreferredTime,
+                        Penalty = pt.Penalty
+                    };
+                    _context.Add(teacherPreferredTime);
+                }
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
@@ -81,7 +92,7 @@ namespace Course_Scheduler.Controllers
                 return NotFound();
             }
 
-            var teacher = await _context.Teacher.FindAsync(id);
+            var teacher = await _context.Teacher.Include(t => t.PreferredTimes).FirstAsync(t => t.ID == id);
             if (teacher == null)
             {
                 return NotFound();

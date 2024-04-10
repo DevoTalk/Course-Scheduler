@@ -31,9 +31,6 @@ public class ScheduleComparer: IEqualityComparer<Schedule>
         if (Object.ReferenceEquals(x, null) || Object.ReferenceEquals(y, null))
             return false;
 
-        // Sort CourseTeacherClassTimes lists
-        x.CourseTeacherClassTimes = x.CourseTeacherClassTimes.OrderBy(CTT => CTT.Course.Name).ToList();
-        y.CourseTeacherClassTimes = y.CourseTeacherClassTimes.OrderBy(CTT => CTT.Course.Name).ToList();
 
         // Check equality of CourseTeacherClassTimes
         if (x.CourseTeacherClassTimes.Count != y.CourseTeacherClassTimes.Count)

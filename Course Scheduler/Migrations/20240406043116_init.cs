@@ -18,7 +18,8 @@ namespace Course_Scheduler.Migrations
                         .Annotation("Sqlite:Autoincrement", true),
                     Name = table.Column<string>(type: "TEXT", nullable: false),
                     PrerequisiteID = table.Column<int>(type: "INTEGER", nullable: true),
-                    Credits = table.Column<int>(type: "INTEGER", nullable: false)
+                    Credits = table.Column<int>(type: "INTEGER", nullable: false),
+                    CountOfClass = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
