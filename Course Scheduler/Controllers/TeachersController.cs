@@ -85,17 +85,72 @@ namespace Course_Scheduler.Controllers
         }
 
 
+        [HttpGet]
+        public async Task<IActionResult> Edit(int id)
+        {
+            var teacher = await _context.Teacher.Include(t => t.PreferredTimes).FirstOrDefaultAsync(t => t.ID == id);
+            if(teacher == null)
+            {
+                return NotFound();
+            }
+            var preferredTimeViewModel = new List<TeacherClassTimeWithPenaltiesViewModel>();
+            foreach (var item in teacher.PreferredTimes)
+            {
+                preferredTimeViewModel.Add(new()
+                {
+                    PreferredTime = item.PreferredTime,
+                    Penalty = item.Penalty
+                });
+            }
+            var updateTeacherViewModel = new UpdateTeacherViewModel()
+            {
+                ID = id,
+                Name = teacher.Name,
+                PreferredTime = preferredTimeViewModel
+            };
+
+
+            return View(updateTeacherViewModel);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Edit(int id,UpdateTeacherViewModel updateTeacherViewModel)
+        {
+            var teacher = await _context.Teacher.FirstOrDefaultAsync(t => t.ID == id);
+            if (teacher == null)
+            {
+                return NotFound();
+            }
+            if(ModelState.IsValid)
+            {
+                teacher.Name = updateTeacherViewModel.Name;
+                _context.Update(teacher);
+                var oldTimes = _context.TeacherClassTimeWithPenalties.Where(t => t.TeacherId == id).ToList();
+                _context.TeacherClassTimeWithPenalties.RemoveRange(oldTimes);
+                foreach (var item in updateTeacherViewModel.PreferredTime)
+                {
+                    _context.TeacherClassTimeWithPenalties.Add(new()
+                    {
+                        PreferredTime = item.PreferredTime,
+                        Penalty = item.Penalty,
+                        TeacherId = id,
+                        Teacher = teacher
+                    });
+                }
+                await _context.SaveChangesAsync();
+                return RedirectToAction(nameof(Index));
+            }
+            return View(updateTeacherViewModel);
+
+        }
 
 
 
 
-        
 
 
 
 
-
-       
         // GET: Teachers/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
