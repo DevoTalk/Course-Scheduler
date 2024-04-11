@@ -36,7 +36,7 @@ namespace Course_Scheduler.Controllers
             }
 
             var teacher = await _context.Teacher
-                .FirstOrDefaultAsync(m => m.ID == id);
+                .Include(t=>t.PreferredTimes).FirstOrDefaultAsync(m => m.ID == id);
             if (teacher == null)
             {
                 return NotFound();
@@ -84,57 +84,18 @@ namespace Course_Scheduler.Controllers
             return View(teacherViewModel);
         }
 
-        // GET: Teachers/Edit/5
-        public async Task<IActionResult> Edit(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
 
-            var teacher = await _context.Teacher.Include(t => t.PreferredTimes).FirstAsync(t => t.ID == id);
-            if (teacher == null)
-            {
-                return NotFound();
-            }
-            return View(teacher);
-        }
 
-        // POST: Teachers/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Name,PreferredTime,ID")] Teacher teacher)
-        {
-            if (id != teacher.ID)
-            {
-                return NotFound();
-            }
 
-            if (ModelState.IsValid)
-            {
-                try
-                {
-                    _context.Update(teacher);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!TeacherExists(teacher.ID))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
-            }
-            return View(teacher);
-        }
 
+
+        
+
+
+
+
+
+       
         // GET: Teachers/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {

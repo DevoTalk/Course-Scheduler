@@ -4,7 +4,7 @@ namespace Course_Scheduler.Models
 {
     public class EvenOddClassTime
     {
-        public ClassTime ClassTime { get; set; }
+        public ClassTimes ClassTime { get; set; }
         public EvenOdd? EvenOdd { get; set; }
     }
     public enum EvenOdd

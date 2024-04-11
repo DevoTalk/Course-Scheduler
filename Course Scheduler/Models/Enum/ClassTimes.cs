@@ -1,6 +1,6 @@
 ﻿namespace Course_Scheduler.Models.Enum
 {
-    public enum ClassTime
+    public enum ClassTimes
     {
         SaturdayT1, SaturdayT2, SaturdayT3, SaturdayT4,SaturdayT5,
         SunDayT1, SunDayT2, SunDayT3, SunDayT4,SunDayT5,

@@ -31,9 +31,9 @@
                 </tr>
             </thead>
             <tbody>
-                @for (int i = 0; i < Enum.GetValues(typeof(ClassTime)).Length; i++)
+                @for (int i = 0; i < Enum.GetValues(typeof(ClassTimes)).Length; i++)
                 {
-                    var time = (ClassTime)Enum.GetValues(typeof(ClassTime)).GetValue(i);
+                    var time = (ClassTimes)Enum.GetValues(typeof(ClassTimes)).GetValue(i);
                     <tr>
                         <td>@time</td>
                         <td>

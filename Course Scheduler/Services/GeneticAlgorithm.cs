@@ -21,7 +21,7 @@ public class CoustomTime
     {
         EvenOdd = new();
     }
-    public ClassTime ClassTime { get; set; }
+    public ClassTimes ClassTime { get; set; }
     public List<CoustomEvenOdd>? EvenOdd { get; set; }
 }
 public enum CoustomEvenOdd
@@ -53,14 +53,14 @@ public class GeneticAlgorithm
         public Course Course1 { get; set; }
         public Course Course2 { get; set; }
     }
-    private class ClassTimeComparer : IComparer<ClassTime>
+    private class ClassTimeComparer : IComparer<ClassTimes>
     {
-        public int Compare(ClassTime x, ClassTime y)
+        public int Compare(ClassTimes x, ClassTimes y)
         {
             return x.ToString().CompareTo(y.ToString());
         }
     }
-    static bool AreOnSameDay(ClassTime classTime1, ClassTime classTime2)
+    static bool AreOnSameDay(ClassTimes classTime1, ClassTimes classTime2)
     {
         // Extract day from enum values
         var day1 = classTime1.ToString().Substring(0, classTime1.ToString().IndexOf('T'));
