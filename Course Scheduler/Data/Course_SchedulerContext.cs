@@ -25,6 +25,8 @@ namespace Course_Scheduler.Data
         public DbSet<Course_Scheduler.Models.CourseToTeacher> CourseToTeacher { get; set; } = default!;
         public DbSet<Course_Scheduler.Models.CoursePenalty> CoursePenalty { get; set; } = default!;
         public DbSet<Course_Scheduler.Models.TeacherClassTimeWithPenalties> TeacherClassTimeWithPenalties { get; set; } = default!;
+        public DbSet<Course_Scheduler.Models.CourseTeacherClassTime> CourseTeacherClassTime { get; set; } = default!;
+        public DbSet<Course_Scheduler.Models.EvenOddClassTime> EvenOddClassTime { get; set; } = default!;
 
     }
 }

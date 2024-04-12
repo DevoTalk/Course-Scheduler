@@ -11,17 +11,6 @@ namespace Course_Scheduler.Models
         }
         public List<CourseTeacherClassTime> CourseTeacherClassTimes { get; set; }
         public int TotalPenalty { get; set; }
+        
     }
-    public class CourseTeacherClassTime
-    {
-        public CourseTeacherClassTime()
-        {
-            this.ClassTime = new();
-        }
-        public Course Course { get; set; }
-        public Teacher Teacher { get; set; }
-        public List<EvenOddClassTime> ClassTime { get; set; }
-
-    }
-    
 }
