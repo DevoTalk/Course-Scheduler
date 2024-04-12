@@ -1,0 +1,78 @@
+﻿@using Course_Scheduler.Models.Enum
+@model Course_Scheduler.Models.ViewModels.FixCourseTimeViewModel;
+
+<div class="container course-scheduler-container">
+    <div class="row">
+        @foreach (var teacher in Model.Teachers)
+        {
+            <div class="col-12">
+                <div class="card teacher-section">
+                    <div class="card-header">
+                        <h5 class="card-title">
+                            <input type="radio" id="@teacher.ID" onchange="showFrom(@teacher.ID)" class="form-check-input teacher-radio" name="teacherradio">
+                            <label for="@teacher.ID" class="card-link teacher-label">@teacher.Name</label>
+                        </h5>
+                    </div>
+                    <div class="card-body form-wrapper invisible" id="form-@teacher.ID">
+                        <form asp-action="FixCourseTime" class="course-form">
+                            <input type="hidden" name="CourseId" value="@Model.CourseId" />
+                            <input type="hidden" name="TeacherId" value="@teacher.ID"/>
+                            @for (int i = 0; i < Model.CourseCredits; i++)
+                            {
+                                <div class="row">
+                                    <div class="form-group time-selector row col-6">
+                                        <label for="time-@(i)" class="col-sm-3 col-form-label">Time @i:</label>
+                                        <div class="col-sm-9">
+                                            <select id="time-@(i)" name="Times[@i].ClassTime" class="form-control class-time-select" asp-items="@(new SelectList(teacher.PreferredTimes.Select(t=>t.PreferredTime)))">
+                                                <option value="">Please select one</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="form-group row col-6">
+                                        <label for="even-odd-@(i)" class="col-sm-3 col-form-label">Even or Odd:</label>
+                                        <div class="col-sm-9">
+                                            <select id="even-odd-@(i)" name="Times[@i].EvenOdd" class="form-control even-odd-select" asp-items="@(new SelectList(Enum.GetValues(typeof(EvenOdd))))">
+                                                <option value="">Please select one</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                            <button type="submit" class="btn btn-primary fix-button">Fix Course Time</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function showFrom(id) {
+
+            console.log(id);
+
+            var form = document.getElementById(`form-${id}`);
+
+            console.log(form);
+
+            var isChecked = document.getElementById(id).checked;
+
+            console.log(isChecked);
+
+            if (isChecked) {
+                hideAllForms();
+                form.classList.remove("invisible");
+            } else {
+                form.classList.add("invisible");
+            }
+        }
+        function hideAllForms() {
+            const forms = document.querySelectorAll('.form-wrapper');
+            forms.forEach(function (form) {
+                form.classList.add("invisible");
+            });
+        }
+    </script>
+}

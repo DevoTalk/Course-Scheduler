@@ -247,6 +247,42 @@ namespace Course_Scheduler.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+
+
+
+
+        public async Task<IActionResult> FixCourseTime(int id)
+        {
+            var course = await _context.Courses.FirstAsync(c => c.ID == id);
+            var teachersOfThisCourse = await _context.CourseToTeacher
+                .Include(tc => tc.Teacher)
+                    .Where(tc => tc.CourseID == id)
+                        .Select(tc => tc.Teacher).ToListAsync();
+            foreach (var teacher in teachersOfThisCourse)
+            {
+                var freeTimes = await _context.TeacherClassTimeWithPenalties.Where(tp => tp.TeacherId == teacher.ID).ToListAsync();
+                teacher.PreferredTimes = freeTimes;
+            }
+            var fixCourseTimeViewModel = new FixCourseTimeViewModel()
+            {
+                CourseId = id,
+                Teachers = teachersOfThisCourse,
+                CourseCredits = course.Credits,
+            };
+            return View(fixCourseTimeViewModel);
+        }
+        [HttpPost]
+        public async Task<IActionResult> FixCourseTime(FixCourseTimeViewModel fixCourseTimeViewModel)
+        {
+            var CTT = new CourseTeacherClassTime();
+            
+            return View();
+        }
+
+
+
+
+
         private bool CourseExists(int id)
         {
             return _context.Courses.Any(e => e.ID == id);
