@@ -4,5 +4,6 @@
     {
         public Course Course { get; set; }
         public List<Teacher> Teachers { get; set; }
+        public bool IsFix { get; set; }
     }
 }

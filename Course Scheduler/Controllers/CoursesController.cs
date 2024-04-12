@@ -9,6 +9,7 @@ using Course_Scheduler.Data;
 using Course_Scheduler.Models;
 using Course_Scheduler.Models.ViewModels;
 using NuGet.DependencyResolver;
+using Course_Scheduler.Models.Enum;
 
 namespace Course_Scheduler.Controllers
 {
@@ -26,19 +27,26 @@ namespace Course_Scheduler.Controllers
         public async Task<IActionResult> Index()
         {
             var courseAndTeachersViewModel = new List<CourseAndTeachersViewModel>();
-            var courses= await _context.Courses.Include(c => c.Prerequisite).ToListAsync();
-            foreach(var course in courses)
+            var courses = await _context.Courses.Include(c => c.Prerequisite).ToListAsync();
+            foreach (var course in courses)
             {
+                var ctt = await _context.CourseTeacherClassTime.FirstOrDefaultAsync(c => c.Course == course);
+                var isFix = false;
+                if (ctt != null)
+                {
+                    isFix = true;
+                }
                 var teachresIds = await _context.CourseToTeacher.Where(c => c.CourseID == course.ID).Select(p => p.TeacherID).ToListAsync();
                 var teachers = new List<Teacher>();
                 foreach (var id in teachresIds)
                 {
-                     teachers.Add(_context.Teacher.First(t => t.ID == id));
+                    teachers.Add(_context.Teacher.First(t => t.ID == id));
                 }
                 courseAndTeachersViewModel.Add(new()
                 {
                     Course = course,
-                    Teachers = teachers
+                    Teachers = teachers,
+                    IsFix = isFix,
                 });
             }
 
@@ -152,7 +160,7 @@ namespace Course_Scheduler.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id,AddCourseViewModel viewModel)
+        public async Task<IActionResult> Edit(int id, AddCourseViewModel viewModel)
         {
             if (id != viewModel.Course.ID)
             {
@@ -169,7 +177,7 @@ namespace Course_Scheduler.Controllers
                         _context.CourseToTeacher.Remove(teacher);
                     }
                     _context.Update(viewModel.Course);
-                    foreach(var TeacherId in viewModel.TeachersId)
+                    foreach (var TeacherId in viewModel.TeachersId)
                     {
                         _context.CourseToTeacher.Add(new()
                         {
@@ -240,7 +248,7 @@ namespace Course_Scheduler.Controllers
                     _context.Remove(item);
                 }
                 _context.Courses.Remove(course);
-                
+
             }
 
             await _context.SaveChangesAsync();
@@ -274,14 +282,53 @@ namespace Course_Scheduler.Controllers
         [HttpPost]
         public async Task<IActionResult> FixCourseTime(FixCourseTimeViewModel fixCourseTimeViewModel)
         {
-            var CTT = new CourseTeacherClassTime();
-            
-            return View();
+            if (ModelState.IsValid)
+            {
+                var course = await _context.Courses.FirstAsync(c => c.ID == fixCourseTimeViewModel.CourseId);
+                var teacher = await _context.Teacher.FirstAsync(t => t.ID == fixCourseTimeViewModel.TeacherId);
+                var CTT = new CourseTeacherClassTime()
+                {
+                    Course = course,
+                    Teacher = teacher,
+                };
+                await _context.CourseTeacherClassTime.AddAsync(CTT);
+                await _context.SaveChangesAsync();
+
+                foreach (var time in fixCourseTimeViewModel.Times)
+                {
+                    if (time.ClassTime != null && time.EvenOdd != null)
+                    {
+                        await _context.EvenOddClassTime.AddAsync(new()
+                        {
+                            ClassTime = (ClassTimes)time.ClassTime,
+                            EvenOdd = time.EvenOdd,
+                            CourseTeacherClass = CTT
+                        });
+                        await _context.SaveChangesAsync();
+                    }
+                }
+                return RedirectToAction(nameof(Index));
+            }
+            return RedirectToAction(nameof(FixCourseTime),fixCourseTimeViewModel.CourseId);
         }
 
-
-
-
+        public async Task<IActionResult> UnFixCourse(int id)
+        {
+            var course = await _context.Courses.FirstOrDefaultAsync(c => c.ID == id);
+            if(course != null)
+            {
+                var Ctt = await _context.CourseTeacherClassTime.FirstOrDefaultAsync(c => c.Course == course);
+                if(Ctt != null) 
+                {
+                    var times = _context.EvenOddClassTime.Where(t => t.CourseTeacherClassTimeId == Ctt.ID).ToList();
+                    
+                    _context.CourseTeacherClassTime.Remove(Ctt);
+                    _context.EvenOddClassTime.RemoveRange(times);
+                    await _context.SaveChangesAsync();
+                }
+            }
+            return RedirectToAction(nameof(Index));
+        }
 
         private bool CourseExists(int id)
         {

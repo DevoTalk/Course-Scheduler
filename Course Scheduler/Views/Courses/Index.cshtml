@@ -43,7 +43,18 @@
                 <td>
                     <a asp-action="Edit" asp-route-id="@item.Course.ID">Edit</a> |
                     <a asp-action="Details" asp-route-id="@item.Course.ID">Details</a> |
-                    <a asp-action="Delete" asp-route-id="@item.Course.ID">Delete</a>
+                    <a asp-action="Delete" asp-route-id="@item.Course.ID">Delete</a>|
+
+                    @if (item.IsFix)
+                    {
+                        <label class="text-danger">fix</label>
+                        <a asp-action="UnFixCourse" asp-route-id="@item.Course.ID">Unfix</a>
+                    }
+                    else
+                    {
+                        <a asp-action="FixCourseTime" asp-route-id="@item.Course.ID">FixCourseTime</a>
+                    }
+
                 </td>
             </tr>
         }
