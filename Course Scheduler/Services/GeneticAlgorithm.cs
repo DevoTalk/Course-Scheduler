@@ -334,6 +334,7 @@ public class GeneticAlgorithm
                 var penalty = CalculatePenalty(schedule);
                 schedule.TotalPenalty = penalty;
                 schedules.Add(schedule);
+                schedules.Distinct();
                 count++;
             }
             else

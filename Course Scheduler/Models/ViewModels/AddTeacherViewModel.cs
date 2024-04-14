@@ -9,6 +9,8 @@ namespace Course_Scheduler.Models.ViewModels
             this.PreferredTime = new();
         }
         public string Name { get; set; }
+        public int MaximumDayCount { get; set; }
+
         public List<TeacherClassTimeWithPenaltiesViewModel> PreferredTime { get; set; }
     }
     public class TeacherClassTimeWithPenaltiesViewModel

@@ -11,6 +11,7 @@ public class Teacher : Base
     }
     public string Name { get; set; }
     public List<TeacherClassTimeWithPenalties> PreferredTimes{ get; set; }
+    public int MaximumDayCount { get; set; }
 }
 public class TeacherClassTimeWithPenalties : Base
 {

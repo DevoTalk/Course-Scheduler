@@ -64,6 +64,7 @@ namespace Course_Scheduler.Controllers
                 var teacher = new Teacher()
                 {
                     Name = teacherViewModel.Name,
+                    MaximumDayCount = teacherViewModel.MaximumDayCount,
                 };
                 _context.Add(teacher);
                 await _context.SaveChangesAsync();
@@ -124,6 +125,7 @@ namespace Course_Scheduler.Controllers
             if(ModelState.IsValid)
             {
                 teacher.Name = updateTeacherViewModel.Name;
+                teacher.MaximumDayCount = updateTeacherViewModel.MaximumDayCount;
                 _context.Update(teacher);
                 var oldTimes = _context.TeacherClassTimeWithPenalties.Where(t => t.TeacherId == id).ToList();
                 _context.TeacherClassTimeWithPenalties.RemoveRange(oldTimes);
