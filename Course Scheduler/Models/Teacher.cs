@@ -17,6 +17,7 @@ public class TeacherClassTimeWithPenalties : Base
 {
     public ClassTimes PreferredTime {get; set; }
     public int Penalty {get; set; }
+    public EvenOdd? EvenOdd { get; set; }
     public int TeacherId { get; set; }
     public Teacher Teacher { get; set; }
 }
