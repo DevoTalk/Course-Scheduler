@@ -107,6 +107,7 @@ namespace Course_Scheduler.Controllers
             {
                 ID = id,
                 Name = teacher.Name,
+                MaximumDayCount = teacher.MaximumDayCount,
                 PreferredTime = preferredTimeViewModel
             };
 
