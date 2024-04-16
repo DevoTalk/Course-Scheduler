@@ -1,5 +1,6 @@
 ﻿using Course_Scheduler.Models;
 using Course_Scheduler.Models.Enum;
+using NuGet.DependencyResolver;
 using System.Collections.Generic;
 using System.Text;
 
@@ -87,7 +88,7 @@ public class GeneticAlgorithm
             }
             foreach (var classTime in classTimes)
             {
-                var penaltieOfTime = Teachers.First(t => t == teacher).PreferredTimes.First(t => t.PreferredTime == classTime).Penalty;
+                var penaltieOfTime = Teachers.First(t => t.ID == teacher.ID).PreferredTimes.First(t => t.PreferredTime == classTime).Penalty;
                 penalties[teacher] += penaltieOfTime;
             }
         }
@@ -162,10 +163,29 @@ public class GeneticAlgorithm
             bool isHealthy = true;
             var courentCourseList = new List<Course>();
             courentCourseList.AddRange(Courses);
-            var courentTeacherList = new List<Teacher>();
-            courentTeacherList.AddRange(Teachers);
-
-
+            var courentTeacherList = new Teacher[Teachers.Count];
+            for (int i = 0; i < Teachers.Count; i++)
+            {
+                courentTeacherList[i] = new Teacher()
+                {
+                    ID = Teachers[i].ID,
+                    Name = Teachers[i].Name,
+                    MaximumDayCount = Teachers[i].MaximumDayCount,
+                };
+                courentTeacherList[i].PreferredTimes = new List<TeacherClassTimeWithPenalties>();
+                foreach (var time in Teachers[i].PreferredTimes)
+                {
+                    courentTeacherList[i].PreferredTimes.Add(new()
+                    {
+                        ID = time.ID,
+                        EvenOdd = time.EvenOdd,
+                        Penalty = time.Penalty,
+                        PreferredTime = time.PreferredTime,
+                        Teacher = time.Teacher,
+                        TeacherId = time.TeacherId,
+                    });
+                }
+            }
 
             #endregion
             for (int j = 1; j <= Courses.Count(); j++)
@@ -264,7 +284,8 @@ public class GeneticAlgorithm
                                             ClassTime = time.PreferredTime,
                                             EvenOdd = EvenOdd.odd
                                         });
-                                        courentTeacherList.First(t => t == teacher).PreferredTimes.First(t => t.PreferredTime == time.PreferredTime).EvenOdd = null;
+                                        //courentTeacherList.First(t => t == teacher).PreferredTimes.First(t => t.PreferredTime == time.PreferredTime).EvenOdd = null;
+                                        teacher.PreferredTimes.Remove(time);
                                         remainingCourseCredits -= 1;
                                     }
                                     else if (time.EvenOdd == EvenOdd.even)
@@ -274,7 +295,8 @@ public class GeneticAlgorithm
                                             ClassTime = time.PreferredTime,
                                             EvenOdd = Models.Enum.EvenOdd.even
                                         });
-                                        courentTeacherList.First(t => t == teacher).PreferredTimes.First(t => t.PreferredTime == time.PreferredTime).EvenOdd = null;
+                                        //courentTeacherList.First(t => t == teacher).PreferredTimes.First(t => t.PreferredTime == time.PreferredTime).EvenOdd = null;
+                                        teacher.PreferredTimes.Remove(time);
                                         remainingCourseCredits -= 1;
                                     }
                                 }
@@ -301,7 +323,7 @@ public class GeneticAlgorithm
                     }
                 }
             }
-            if (isHealthy)
+            if (isHealthy && IsMaxDayCountOfTeacherExceeded(schedule))
             {
                 var penalty = CalculatePenalty(schedule);
                 schedule.TotalPenalty = penalty;
@@ -315,6 +337,33 @@ public class GeneticAlgorithm
             }
         }
         return schedules;
+    }
+
+    private bool IsMaxDayCountOfTeacherExceeded(Schedule schedule)
+    {
+        var isHealthy = true;
+        var teachers = schedule.CourseTeacherClassTimes.Select(ctt => ctt.Teacher).ToList();
+        teachers = teachers.Distinct().ToList();
+        foreach (var teacher in teachers)
+        {
+            var countOfClass = new List<string>();
+            var classTimeOfTeacher = schedule.CourseTeacherClassTimes
+                .Where(ctt => ctt.Teacher == teacher)
+                    .SelectMany(ctt => ctt.ClassTime)
+                        .Select(ct => ct.ClassTime).ToList();
+
+            foreach (var classTime in classTimeOfTeacher)
+            {
+                var day = classTime.ToString().Substring(0, classTime.ToString().IndexOf('T'));
+                countOfClass.Add(day);
+            }
+            countOfClass = countOfClass.Distinct().ToList();
+            if(countOfClass.Count > teacher.MaximumDayCount)
+            {
+                isHealthy = false;
+            }
+        }
+        return isHealthy;
     }
     private Course SelectCourse(List<Course> courentCourseList)
     {
