@@ -41,7 +41,7 @@
                             <td>@item.Course.Name</td>
                             <td>@item.Teacher.Name</td>
                             <td>
-                                @foreach (var time in item.ClassTime)
+                                @foreach (var time in item.ClassTimes)
                                 {
                                     <p>@time.ClassTime.ToString()  @time.EvenOdd</p>
                                 }

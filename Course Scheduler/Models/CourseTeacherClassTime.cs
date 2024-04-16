@@ -5,12 +5,12 @@
 
         public CourseTeacherClassTime()
         {
-            this.ClassTime = new();
+            this.ClassTimes = new();
         }
 
         public Course Course { get; set; }
         public Teacher Teacher { get; set; }
-        public List<EvenOddClassTime> ClassTime { get; set; }
+        public List<EvenOddClassTime> ClassTimes { get; set; }
 
     }
 }

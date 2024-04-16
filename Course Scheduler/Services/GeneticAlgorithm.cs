@@ -14,9 +14,11 @@ public class GeneticAlgorithm
     public List<CourseToTeacher> CourseToTeacher { get; set; }
     public List<CoursePenalty> CoursePenalties { get; set; }
     public List<Teacher> Teachers { get; set; }
-    public GeneticAlgorithm(List<Course> courses, List<CourseToTeacher> courseToTeacher, List<CoursePenalty> coursePenalties, List<Teacher> teachers)
+    public List<CourseTeacherClassTime> FixedCourses { get; set; }
+    public GeneticAlgorithm(List<Course> courses, List<CourseToTeacher> courseToTeacher, List<CoursePenalty> coursePenalties, List<Teacher> teachers, List<CourseTeacherClassTime> fixedCourses)
     {
         Courses = courses;
+        FixedCourses = fixedCourses;
         CourseToTeacher = courseToTeacher;
         CoursePenalties = coursePenalties;
         Teachers = teachers;
@@ -74,7 +76,7 @@ public class GeneticAlgorithm
                 penalties[teacher] = 0;
             }
 
-            var classTimes = courseTeacherClassTime.ClassTime.Select(ct => ct.ClassTime).OrderBy(ct => ct).ToList();
+            var classTimes = courseTeacherClassTime.ClassTimes.Select(ct => ct.ClassTime).OrderBy(ct => ct).ToList();
             for (int i = 0; i < classTimes.Count - 1; i++)
             {
                 var currentClass = classTimes[i];
@@ -109,9 +111,9 @@ public class GeneticAlgorithm
             {
                 if (CTT1 != CTT2)
                 {
-                    foreach (var ct in CTT1.ClassTime)
+                    foreach (var ct in CTT1.ClassTimes)
                     {
-                        foreach (var ct2 in CTT2.ClassTime)
+                        foreach (var ct2 in CTT2.ClassTimes)
                         {
                             if (ct.ClassTime == ct2.ClassTime)
                             {
@@ -186,9 +188,12 @@ public class GeneticAlgorithm
                     });
                 }
             }
-
             #endregion
-            for (int j = 1; j <= Courses.Count(); j++)
+
+            schedule = AddFixedCourseToSchedule(schedule, courentCourseList,courentTeacherList);
+
+
+            for (int j = 1; j <= courentCourseList.Count(); j++)
             {
 
                 var CTT = new CourseTeacherClassTime();
@@ -259,7 +264,7 @@ public class GeneticAlgorithm
                                     {
                                         if (rnd.NextDouble() > 0.5)
                                         {
-                                            CTT.ClassTime.Add(new()
+                                            CTT.ClassTimes.Add(new()
                                             {
                                                 ClassTime = time.PreferredTime,
                                                 EvenOdd = EvenOdd.odd
@@ -268,7 +273,7 @@ public class GeneticAlgorithm
                                         }
                                         else
                                         {
-                                            CTT.ClassTime.Add(new()
+                                            CTT.ClassTimes.Add(new()
                                             {
                                                 ClassTime = time.PreferredTime,
                                                 EvenOdd = Models.Enum.EvenOdd.even
@@ -279,7 +284,7 @@ public class GeneticAlgorithm
                                     }
                                     else if (time.EvenOdd == EvenOdd.odd)
                                     {
-                                        CTT.ClassTime.Add(new()
+                                        CTT.ClassTimes.Add(new()
                                         {
                                             ClassTime = time.PreferredTime,
                                             EvenOdd = EvenOdd.odd
@@ -290,7 +295,7 @@ public class GeneticAlgorithm
                                     }
                                     else if (time.EvenOdd == EvenOdd.even)
                                     {
-                                        CTT.ClassTime.Add(new()
+                                        CTT.ClassTimes.Add(new()
                                         {
                                             ClassTime = time.PreferredTime,
                                             EvenOdd = Models.Enum.EvenOdd.even
@@ -304,7 +309,7 @@ public class GeneticAlgorithm
                                 {
                                     if (time.EvenOdd == EvenOdd.everyWeek)
                                     {
-                                        CTT.ClassTime.Add(new()
+                                        CTT.ClassTimes.Add(new()
                                         {
                                             ClassTime = time.PreferredTime,
                                             EvenOdd = EvenOdd.everyWeek
@@ -339,6 +344,29 @@ public class GeneticAlgorithm
         return schedules;
     }
 
+    private Schedule AddFixedCourseToSchedule(Schedule schedule,List<Course> courentCourseList, Teacher[] courentTeachers)
+    {
+        foreach (var fixedCtt in FixedCourses)
+        {
+            schedule.CourseTeacherClassTimes.Add(new()
+            {
+                Course = fixedCtt.Course,
+                ClassTimes = fixedCtt.ClassTimes,
+                Teacher = fixedCtt.Teacher,
+            });
+
+            courentCourseList.Remove(fixedCtt.Course);
+            
+            foreach (var classTime in fixedCtt.ClassTimes)
+            {
+                var teacher = courentTeachers.First(t => t.ID == fixedCtt.Teacher.ID);
+                teacher.PreferredTimes.Remove(teacher.PreferredTimes.First(t => t.PreferredTime == classTime.ClassTime));
+            }
+
+        }
+        return schedule;
+    }
+
     private bool IsMaxDayCountOfTeacherExceeded(Schedule schedule)
     {
         var isHealthy = true;
@@ -349,7 +377,7 @@ public class GeneticAlgorithm
             var countOfClass = new List<string>();
             var classTimeOfTeacher = schedule.CourseTeacherClassTimes
                 .Where(ctt => ctt.Teacher == teacher)
-                    .SelectMany(ctt => ctt.ClassTime)
+                    .SelectMany(ctt => ctt.ClassTimes)
                         .Select(ct => ct.ClassTime).ToList();
 
             foreach (var classTime in classTimeOfTeacher)

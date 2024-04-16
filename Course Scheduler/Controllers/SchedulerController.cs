@@ -26,7 +26,8 @@ namespace Course_Scheduler.Controllers
             var courseToTeachers = _context.CourseToTeacher.ToList();
             var coursePenaltys = _context.CoursePenalty.ToList();
             var teachers = _context.Teacher.Include(t => t.PreferredTimes).ToList();
-            GeneticAlgorithm ga = new(courses, courseToTeachers, coursePenaltys, teachers);
+            var fixedCourses = _context.CourseTeacherClassTime.Include(ctt => ctt.ClassTimes).ToList();
+            GeneticAlgorithm ga = new(courses, courseToTeachers, coursePenaltys, teachers, fixedCourses);
             //var tasks = new List<Task<List<Schedule>>>();
             //for (int i = 0; i < Count / 100; i++)
             //{
@@ -75,7 +76,7 @@ namespace Course_Scheduler.Controllers
                         worksheet.Cell(row, 3).Value = CTT.Course.Name;
                         worksheet.Cell(row, 4).Value = CTT.Teacher.Name;
                         string times = "";
-                        foreach(var time in CTT.ClassTime)
+                        foreach(var time in CTT.ClassTimes)
                         {
                            times += time.ClassTime.ToString()+ "  " + time.EvenOdd + "  ";
                         }

@@ -46,13 +46,13 @@ public class ScheduleComparer: IEqualityComparer<Schedule>
                 return false;
 
             // Check equality of ClassTime lists
-            if (cttX.ClassTime.Count != cttY.ClassTime.Count)
+            if (cttX.ClassTimes.Count != cttY.ClassTimes.Count)
                 return false;
 
             // Check equality of each ClassTime
-            foreach (var timeOfx in cttX.ClassTime)
+            foreach (var timeOfx in cttX.ClassTimes)
             {
-                if (!cttY.ClassTime.Any(timeOfy => timeOfy.ClassTime == timeOfx.ClassTime && timeOfy.EvenOdd == timeOfx.EvenOdd))
+                if (!cttY.ClassTimes.Any(timeOfy => timeOfy.ClassTime == timeOfx.ClassTime && timeOfy.EvenOdd == timeOfx.EvenOdd))
                     return false;
             }
         }
@@ -70,7 +70,7 @@ public class ScheduleComparer: IEqualityComparer<Schedule>
             {
                 hashCode = hashCode * 23 + ctt.Course.Name.GetHashCode();
                 hashCode = hashCode * 23 + ctt.Teacher.Name.GetHashCode();
-                foreach (var time in ctt.ClassTime)
+                foreach (var time in ctt.ClassTimes)
                 {
                     hashCode = hashCode * 23 + time.ClassTime.GetHashCode();
                     hashCode = hashCode * 23 + time.EvenOdd.GetHashCode();
