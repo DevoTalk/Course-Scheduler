@@ -1,5 +1,6 @@
 ﻿using Course_Scheduler.Models;
 using Course_Scheduler.Models.Enum;
+using DocumentFormat.OpenXml.Office2010.ExcelAc;
 using NuGet.DependencyResolver;
 using System.Collections.Generic;
 using System.Text;
@@ -61,8 +62,29 @@ public class GeneticAlgorithm
         var penalty = 0;
         penalty += PenaltyOfOverlay(schedule.CourseTeacherClassTimes);
         penalty += PenaltyOfTeacher(schedule.CourseTeacherClassTimes);
+        penalty += PenaltyOfMaximumCountOfClassInSection(schedule.CourseTeacherClassTimes);
         return penalty;
     }
+
+    private int PenaltyOfMaximumCountOfClassInSection(List<CourseTeacherClassTime> courseTeacherClassTimes)
+    {
+        int penalty = 0;
+        
+        var sections = courseTeacherClassTimes.SelectMany(ctt => ctt.ClassTimes).Select(t => t.ClassTime).ToList();
+        
+        var sectionAndCount = sections.GroupBy(x => x)
+            .Select(g => new { Value = g.Key, Count = g.Count() });
+
+        foreach (var section in sectionAndCount)
+        {
+            if (section.Count > 3)
+            {
+                penalty += section.Count - 3;
+            }
+        }
+        return penalty;
+    }
+
     private int PenaltyOfTeacher(List<CourseTeacherClassTime> CourseTeacherClassTimes)
     {
         var penalties = new Dictionary<Teacher, int>();

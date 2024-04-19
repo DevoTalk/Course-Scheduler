@@ -6,6 +6,9 @@ namespace Course_Scheduler.Models
     {
         public ClassTimes ClassTime { get; set; }
         public EvenOdd? EvenOdd { get; set; }
+
+
+
         public int CourseTeacherClassTimeId { get; set; }
         public CourseTeacherClassTime CourseTeacherClass { get; set; }
     }
