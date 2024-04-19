@@ -75,11 +75,12 @@ public class GeneticAlgorithm
         var sectionAndCount = sections.GroupBy(x => x)
             .Select(g => new { Value = g.Key, Count = g.Count() });
 
+        var maximumCountOfClass = 3;
         foreach (var section in sectionAndCount)
         {
-            if (section.Count > 3)
+            if (section.Count > maximumCountOfClass)
             {
-                penalty += section.Count - 3;
+                penalty += (section.Count - maximumCountOfClass);
             }
         }
         return penalty;
