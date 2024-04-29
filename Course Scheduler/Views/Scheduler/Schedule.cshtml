@@ -29,20 +29,22 @@
             <table class="table" id="schedule-table-@i">
                 <thead>
                     <tr>
+                        <th>index</th>
                         <th onclick="sortTable('@i', 0)">Class Name</th>
                         <th onclick="sortTable('@i', 1)">Teacher Name</th>
                         <th onclick="sortTable('@i', 2)">Class Times</th>
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (var item in Model[i].CourseTeacherClassTimes)
+                    @for (int j = 0; j < Model[i].CourseTeacherClassTimes.Count(); j++)
                     {
                         <tr>
-                            <td>@item.Course.Name</td>
-                            <td>@item.Teacher.Name</td>
+                            <td>@j</td>
+                            <td>@Model[i].CourseTeacherClassTimes[j].Course.Name</td>
+                            <td>@Model[i].CourseTeacherClassTimes[j].Teacher.Name</td>
                             <td>
-                                @foreach (var time in item.ClassTimes)
-                                {
+                                @foreach (var time in Model[i].CourseTeacherClassTimes[j].ClassTimes)
+                                            {
                                     <p>@time.ClassTime.ToString()  @time.EvenOdd</p>
                                 }
                             </td>

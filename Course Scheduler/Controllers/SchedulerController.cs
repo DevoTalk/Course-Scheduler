@@ -4,6 +4,7 @@ using Course_Scheduler.Models;
 using Course_Scheduler.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Collections.Concurrent;
 
 namespace Course_Scheduler.Controllers
 {
@@ -27,15 +28,24 @@ namespace Course_Scheduler.Controllers
             var coursePenaltys = _context.CoursePenalty.ToList();
             var teachers = _context.Teacher.Include(t => t.PreferredTimes).ToList();
             var fixedCourses = _context.CourseTeacherClassTime.Include(ctt => ctt.ClassTimes).ToList();
-            GeneticAlgorithm ga = new(courses, courseToTeachers, coursePenaltys, teachers, fixedCourses);
-            //var tasks = new List<Task<List<Schedule>>>();
-            //for (int i = 0; i < Count / 100; i++)
+            var tasks = new List<Task<List<Schedule>>>();
+            //for (int i = 0; i < Count / 10; i++)
             //{
-            //    tasks.Add(ga.GeneratePopulation(100));
+            //    GeneticAlgorithm ga = new(courses, courseToTeachers, coursePenaltys, teachers, fixedCourses);
+            //    tasks.Add(ga.GeneratePopulation(10));
             //}
+            //Parallel.ForEach(Partitioner.Create(0, Count, 10), range =>
+            //{
+            //    for (int i = range.Item1; i < range.Item2; i++)
+            //    {
+            //        GeneticAlgorithm ga = new GeneticAlgorithm(courses, courseToTeachers, coursePenaltys, teachers, fixedCourses);
+            //        tasks.Add(ga.GeneratePopulation(10));
+            //    }
+            //});
             //await Task.WhenAll(tasks);
             var schedules = new List<Schedule>();
-            schedules.AddRange(await ga.GeneratePopulation(100));
+            GeneticAlgorithm ga = new GeneticAlgorithm(courses, courseToTeachers, coursePenaltys, teachers, fixedCourses);
+            schedules.AddRange(await ga.CreateSchedules(Count));
             //foreach (var task in tasks)
             //{
             //    schedules.AddRange(task.Result);
@@ -44,7 +54,7 @@ namespace Course_Scheduler.Controllers
             schedules = schedules.OrderBy(s => s.TotalPenalty).ToList();
 
 
-
+           
 
 
 
