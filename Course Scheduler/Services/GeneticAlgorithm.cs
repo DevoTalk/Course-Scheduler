@@ -172,32 +172,28 @@ public class GeneticAlgorithm
     }
     #endregion
 
-    public async Task<List<Schedule>> CreateSchedules(int Count = 100)
+    public async Task<List<Schedule>> CreateSchedules(int Count = 100, int UnhealtyCount = 1000)
     {
         var schedules = new List<Schedule>();
-        var tasks = new List<Task<List<Schedule>>>();
-        Parallel.ForEach(Partitioner.Create(0, Count, 10), range =>
+
+
+        Parallel.For(0, 10, i =>
         {
-            for (int i = range.Item1; i < range.Item2; i++)
-            {
-                tasks.Add(GeneratePopulation(10));
-            }
+            schedules.AddRange(GeneratePopulation(Count/10, UnhealtyCount/10));
         });
-        await Task.WhenAll(tasks);
-        foreach (var task in tasks)
-        {
-            schedules.AddRange(task.Result);
-        }
+
+
+        
         return schedules;
     }
-    public async Task<List<Schedule>> GeneratePopulation(int Count = 100)
+    public  List<Schedule> GeneratePopulation(int Count = 100,int UnhealtyCount = 1000)
     {
         var schedules = new List<Schedule>();
         var count = 0;
         var unhealtyCount = 0;
         while (count < Count)
         {
-            if (unhealtyCount > Count * 10)
+            if (unhealtyCount > UnhealtyCount)
             {
                 break;
             }
@@ -389,6 +385,8 @@ public class GeneticAlgorithm
                 schedules.Add(schedule);
                 schedules.Distinct();
                 count++;
+                Console.WriteLine("schedules is created");
+                Console.WriteLine(schedules.Count());
             }
             else
             {

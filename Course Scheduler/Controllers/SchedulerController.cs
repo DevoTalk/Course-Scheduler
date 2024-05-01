@@ -21,7 +21,7 @@ namespace Course_Scheduler.Controllers
         {
             return View();
         }
-        public async Task<IActionResult> GeneticAlgorithm(int Count = 100) 
+        public async Task<IActionResult> GeneticAlgorithm(int Count = 100, int UnhealtyCount = 1000) 
         {
             var courses = _context.Courses.ToList();
             var courseToTeachers = _context.CourseToTeacher.ToList();
@@ -45,7 +45,7 @@ namespace Course_Scheduler.Controllers
             //await Task.WhenAll(tasks);
             var schedules = new List<Schedule>();
             GeneticAlgorithm ga = new GeneticAlgorithm(courses, courseToTeachers, coursePenaltys, teachers, fixedCourses);
-            schedules.AddRange(await ga.CreateSchedules(Count));
+            schedules.AddRange(await ga.CreateSchedules(Count,UnhealtyCount));
             //foreach (var task in tasks)
             //{
             //    schedules.AddRange(task.Result);
