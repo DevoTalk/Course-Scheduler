@@ -51,7 +51,7 @@ namespace Course_Scheduler.Controllers
             //    schedules.AddRange(task.Result);
             //}
             schedules = schedules.Distinct();
-            schedules = schedules.OrderBy(s => s.TotalPenalty).ToList();
+            schedules = schedules.OrderBy(s => s.Penalty.TotalPenalty).ToList();
 
 
            
@@ -79,7 +79,7 @@ namespace Course_Scheduler.Controllers
                     worksheet.Row(row).Style.Fill.BackgroundColor = XLColor.LightGray;
                     worksheet.Cell(row, 1).Value = id;
                     id++;
-                    worksheet.Cell(row, 2).Value = schedule.TotalPenalty;
+                    worksheet.Cell(row, 2).Value = schedule.Penalty.TotalPenalty;
                     row++;
                     foreach (var CTT in schedule.CourseTeacherClassTimes)
                     {

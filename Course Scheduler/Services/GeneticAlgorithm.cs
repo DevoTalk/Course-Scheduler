@@ -58,12 +58,13 @@ public class GeneticAlgorithm
     #endregion
 
     #region Penalty
-    public int CalculatePenalty(Schedule schedule)
+    public Penalty CalculatePenalty(Schedule schedule)
     {
-        var penalty = 0;
-        penalty += PenaltyOfOverlay(schedule.CourseTeacherClassTimes);
-        penalty += PenaltyOfTeacher(schedule.CourseTeacherClassTimes);
-        penalty += PenaltyOfMaximumCountOfClassInSection(schedule.CourseTeacherClassTimes);
+        var penalty = new Penalty();
+        penalty.PenaltyOfOverlay = PenaltyOfOverlay(schedule.CourseTeacherClassTimes);
+        penalty.PenaltyOfTeacher = PenaltyOfTeacher(schedule.CourseTeacherClassTimes);
+        penalty.PenaltyOfMaximumCountOfClassInSection = PenaltyOfMaximumCountOfClassInSection(schedule.CourseTeacherClassTimes);
+        penalty.TotalPenalty = penalty.PenaltyOfOverlay + penalty.PenaltyOfTeacher + penalty.PenaltyOfMaximumCountOfClassInSection;
         return penalty;
     }
 
@@ -381,7 +382,7 @@ public class GeneticAlgorithm
             if (isHealthy && IsMaxDayCountOfTeacherExceeded(schedule))
             {
                 var penalty = CalculatePenalty(schedule);
-                schedule.TotalPenalty = penalty;
+                schedule.Penalty = penalty;
                 schedules.Add(schedule);
                 schedules.Distinct();
                 count++;

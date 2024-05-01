@@ -10,7 +10,6 @@ namespace Course_Scheduler.Models
             this.CourseTeacherClassTimes = new();
         }
         public List<CourseTeacherClassTime> CourseTeacherClassTimes { get; set; }
-        public int TotalPenalty { get; set; }
-        
+        public Penalty Penalty { get; set; }
     }
 }
