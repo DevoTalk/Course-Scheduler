@@ -10,6 +10,8 @@ namespace Course_Scheduler.Models.ViewModels
         }
         public string Name { get; set; }
         public int MaximumDayCount { get; set; }
+        public int PenaltyForEmptyTime { get; set; } = 1;
+
 
         public List<TeacherClassTimeWithPenaltiesViewModel> PreferredTime { get; set; }
     }

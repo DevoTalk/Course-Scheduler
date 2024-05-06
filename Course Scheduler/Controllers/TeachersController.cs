@@ -65,6 +65,7 @@ namespace Course_Scheduler.Controllers
                 {
                     Name = teacherViewModel.Name,
                     MaximumDayCount = teacherViewModel.MaximumDayCount,
+                    PenaltyForEmptyTime = teacherViewModel.PenaltyForEmptyTime,
                 };
                 _context.Add(teacher);
                 await _context.SaveChangesAsync();
@@ -108,6 +109,7 @@ namespace Course_Scheduler.Controllers
                 ID = id,
                 Name = teacher.Name,
                 MaximumDayCount = teacher.MaximumDayCount,
+                PenaltyForEmptyTime = teacher.PenaltyForEmptyTime,
                 PreferredTime = preferredTimeViewModel
             };
 
@@ -127,7 +129,9 @@ namespace Course_Scheduler.Controllers
             {
                 teacher.Name = updateTeacherViewModel.Name;
                 teacher.MaximumDayCount = updateTeacherViewModel.MaximumDayCount;
+                teacher.PenaltyForEmptyTime = updateTeacherViewModel.PenaltyForEmptyTime;
                 _context.Update(teacher);
+
                 var oldTimes = _context.TeacherClassTimeWithPenalties.Where(t => t.TeacherId == id).ToList();
                 _context.TeacherClassTimeWithPenalties.RemoveRange(oldTimes);
                 foreach (var item in updateTeacherViewModel.PreferredTime)

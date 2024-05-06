@@ -108,9 +108,13 @@ public class GeneticAlgorithm
                 var nextClass = classTimes[i + 1];
 
                 // Check if classes are not consecutive and on the same day
-                if (nextClass - currentClass > 1 && AreOnSameDay(currentClass, nextClass))
+                var distanceOfTimes = nextClass - currentClass;
+                if (distanceOfTimes > 1)
                 {
-                    penalties[teacher]++;
+                    if (AreOnSameDay(currentClass, nextClass))
+                    {
+                        penalties[teacher] += teacher.PenaltyForEmptyTime;
+                    }
                 }
             }
             foreach (var classTime in classTimes)
@@ -178,13 +182,13 @@ public class GeneticAlgorithm
         var schedules = new List<Schedule>();
 
 
-        Parallel.For(0, 10, i =>
-        {
-            schedules.AddRange(GeneratePopulation(Count/10, UnhealtyCount/10));
-        });
+        //Parallel.For(0, 10, i =>
+        //{
+            //schedules.AddRange(GeneratePopulation(Count/10, UnhealtyCount/10));
+        ;//});
+        schedules.AddRange(GeneratePopulation(Count, UnhealtyCount));
 
 
-        
         return schedules;
     }
     public  List<Schedule> GeneratePopulation(int Count = 100,int UnhealtyCount = 1000)
