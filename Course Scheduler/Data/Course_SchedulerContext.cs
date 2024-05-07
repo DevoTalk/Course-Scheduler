@@ -16,6 +16,11 @@ namespace Course_Scheduler.Data
         }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<CoursePrerequisites>()
+                .HasOne(p => p.Course)
+                .WithMany(c => c.Prerequisites)
+                .HasForeignKey(p => p.CourseId);
+
             base.OnModelCreating(modelBuilder);
 
         }
@@ -27,6 +32,7 @@ namespace Course_Scheduler.Data
         public DbSet<Course_Scheduler.Models.TeacherClassTimeWithPenalties> TeacherClassTimeWithPenalties { get; set; } = default!;
         public DbSet<Course_Scheduler.Models.CourseTeacherClassTime> CourseTeacherClassTime { get; set; } = default!;
         public DbSet<Course_Scheduler.Models.EvenOddClassTime> EvenOddClassTime { get; set; } = default!;
+        public DbSet<Course_Scheduler.Models.CoursePrerequisites> CoursePrerequisites { get; set; } = default!;
 
     }
 }

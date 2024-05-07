@@ -4,5 +4,6 @@
     {
         public Course Course { get; set; }
         public List<int> TeachersId { get; set; }
+        public List<int> PrerequisitesId { get; set; }
     }
 }

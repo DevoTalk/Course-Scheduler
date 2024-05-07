@@ -3,6 +3,7 @@ using System;
 using Course_Scheduler.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Course_Scheduler.Migrations
 {
     [DbContext(typeof(Course_SchedulerContext))]
-    partial class Course_SchedulerContextModelSnapshot : ModelSnapshot
+    [Migration("20240506175116_AddPrerequisitesCourse")]
+    partial class AddPrerequisitesCourse
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.3");
@@ -216,13 +219,11 @@ namespace Course_Scheduler.Migrations
 
             modelBuilder.Entity("Course_Scheduler.Models.CoursePrerequisites", b =>
                 {
-                    b.HasOne("Course_Scheduler.Models.Course", "Course")
+                    b.HasOne("Course_Scheduler.Models.Course", null)
                         .WithMany("Prerequisites")
                         .HasForeignKey("CourseId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("Course");
                 });
 
             modelBuilder.Entity("Course_Scheduler.Models.CourseTeacherClassTime", b =>

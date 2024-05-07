@@ -74,7 +74,7 @@ namespace Course_Scheduler.Controllers
             await _context.SaveChangesAsync();
 
             var coursePenaltys = new List<CoursePenalty>();
-            var courses = await _context.Courses.ToListAsync();
+            var courses = await _context.Courses.Include(c => c.Prerequisites).ToListAsync();
             foreach (var course in courses)
             {
                 foreach (var courseToAdd in courses)
@@ -85,7 +85,9 @@ namespace Course_Scheduler.Controllers
                         if (courseToAdd.ID != course.ID)
                         {
                             var penalty = 0;
-                            if (course.PrerequisiteID == courseToAdd.PrerequisiteID)
+                            var coursePrerequisites = _context.CoursePrerequisites.Where(c => c.ID == course.ID);
+                            var courseToAddPrerequisites = _context.CoursePrerequisites.Where(c => c.ID == courseToAdd.ID);
+                            if (coursePrerequisites.Select(c => c.PrerequisiteCourseId).Order() == courseToAddPrerequisites.Select(c => c.PrerequisiteCourseId).Order())
                             {
                                 penalty = 1;
                             }

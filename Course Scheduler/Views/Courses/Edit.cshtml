@@ -3,6 +3,9 @@
 @{
     ViewData["Title"] = "Edit";
     List<Teacher> teachers = ViewBag.Teachers;
+    var json = Json.Serialize(((List<Course>)ViewData["RequiredCourse"]).Select(c => c.Name));
+    var reqIdjson = Json.Serialize(((List<Course>)ViewData["RequiredCourse"]).Select(c => c.ID));
+
 }
 
 <h1>Edit</h1>
@@ -11,7 +14,7 @@
 <hr />
 <div class="row">
     <div class="col-md-4">
-        <form asp-action="Edit">
+        <form id="addCoursefrom" asp-action="Edit">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="form-group">
                 <label asp-for="Course.Name" class="control-label"></label>
@@ -29,15 +32,21 @@
                 <span asp-validation-for="Course.CountOfClass" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="Course.PrerequisiteID" class="control-label"></label>
-                <select asp-for="Course.PrerequisiteID" class="form-control">
-                    <option value=""> </option>
-                    @foreach (var item in ViewBag.RequiredCourse)
+                <label asp-for="Course.Prerequisites" class="control-label"></label>
+                <div class="input-group mb-3">
+                    <input type="text" id="newItem" class="form-control" placeholder="Enter item here">
+                    <button onclick="addItem()" type="button" class="btn btn-primary">Add Item</button>
+                </div>
+                <ul id="itemList" class="list-group">
+                    @foreach (var item in Model.PrerequisitesId)
                     {
-                        <option value="@item.ID">@item.Name</option>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            @(((List<Course>)ViewData["RequiredCourse"]).First(c => c.ID == item).Name)
+                            <input type="hidden" value="@item" class="requiredCourses">
+                            <button class="btn btn-sm btn-outline-danger" type="button" onclick="RemoveItem(this)">Remove</button>
+                        </li>
                     }
-                </select>
-                <span asp-validation-for="Course.PrerequisiteID" class="text-danger"></span>
+                </ul>
             </div>
             <div class="form-group">
                 <label asp-for="TeachersId" class="control-label"></label>
@@ -53,7 +62,7 @@
             </div>
             <input type="hidden" asp-for="Course.ID" />
             <div class="form-group">
-                <input type="submit" value="Save" class="btn btn-primary" />
+                <input type="button" onclick="submitFrom()" value="Save" class="btn btn-primary" />
             </div>
         </form>
     </div>
@@ -64,5 +73,72 @@
 </div>
 
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+
+    <script>
+        function submitFrom() {
+            var from = document.getElementById("addCoursefrom");
+            EditNameOfRequiredCourses();
+            from.submit();
+        }
+
+        function EditNameOfRequiredCourses() {
+            var inputs = document.querySelectorAll('input[class="requiredCourses"]');
+            console.log(inputs);
+
+            inputs.forEach(function (item, index) {
+                item.name = `PrerequisitesId[${index}]`
+            });
+        }
+
+        var requiredCourses = @json;
+        var requiredCourseIds = @reqIdjson;
+        console.log(RequiredCourse);
+        console.log(requiredCourseIds);
+
+
+        function addItem() {
+            console.log("test");
+            // Get the text from the input field
+            var newItemText = document.getElementById("newItem").value;
+            var indexOfNewItemText = requiredCourses.indexOf(newItemText);
+            if (!newItemText || indexOfNewItemText === -1) return; // Prevent empty items
+
+            // Create a new list item element
+            var newListItem = document.createElement("li");
+            newListItem.classList.add("list-group-item", "d-flex", "justify-content-between", "align-items-center");
+            newListItem.textContent = newItemText;
+
+            var newIput = document.createElement("input");
+            newIput.value = requiredCourseIds[indexOfNewItemText];
+            newIput.type = "hidden";
+            newIput.classList.add("requiredCourses");
+            newListItem.appendChild(newIput);
+
+            // Add a remove button to each list item
+            var removeButton = document.createElement("button");
+            removeButton.classList.add("btn", "btn-sm", "btn-outline-danger");
+            removeButton.textContent = "Remove";
+            removeButton.type = "button";
+            removeButton.onclick = function () {
+                this.parentNode.remove();
+            }
+            newListItem.appendChild(removeButton);
+
+            // Add the new list item to the existing list
+            var itemList = document.getElementById("itemList");
+            itemList.appendChild(newListItem);
+
+            // Clear the input field for the next item
+            document.getElementById("newItem").value = "";
+            event.preventDefault();
+        }
+        function RemoveItem(button) {
+            console.log(button.parentNode)
+            button.parentNode.remove();
+        }
+    </script>
+
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
 }

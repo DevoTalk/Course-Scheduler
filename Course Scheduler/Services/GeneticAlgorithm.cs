@@ -17,13 +17,16 @@ public class GeneticAlgorithm
     public List<CoursePenalty> CoursePenalties { get; set; }
     public List<Teacher> Teachers { get; set; }
     public List<CourseTeacherClassTime> FixedCourses { get; set; }
-    public GeneticAlgorithm(List<Course> courses, List<CourseToTeacher> courseToTeacher, List<CoursePenalty> coursePenalties, List<Teacher> teachers, List<CourseTeacherClassTime> fixedCourses)
+    public List<CoursePrerequisites> CoursePrerequisites { get; set; }
+    public GeneticAlgorithm(List<Course> courses, List<CourseToTeacher> courseToTeacher, List<CoursePenalty> coursePenalties,
+        List<Teacher> teachers, List<CourseTeacherClassTime> fixedCourses, List<CoursePrerequisites> coursePrerequisites)
     {
         Courses = courses;
         FixedCourses = fixedCourses;
         CourseToTeacher = courseToTeacher;
         CoursePenalties = coursePenalties;
         Teachers = teachers;
+        CoursePrerequisites = coursePrerequisites;
         foreach (var teacher in Teachers)
         {
             foreach (var time in teacher.PreferredTimes)
@@ -148,7 +151,7 @@ public class GeneticAlgorithm
                             {
                                 if (ct.EvenOdd == ct2.EvenOdd)
                                 {
-                                    if (CTT1.Course.PrerequisiteID == CTT2.Course.PrerequisiteID)
+                                    if (CTT1.Course.Prerequisites.Select(c => c.PrerequisiteCourseId).Order() == CTT2.Course.Prerequisites.Select(c => c.PrerequisiteCourseId).Order())
                                     {
                                         if (!calculatedCoursePenalty
                                             .Any(c => c.Course1 == CTT1.Course && c.Course2 == CTT2.Course ||

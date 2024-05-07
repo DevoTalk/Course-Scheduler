@@ -101,6 +101,17 @@ namespace Course_Scheduler.Controllers
             {
                 _context.Add(courseAndTeachers.Course);
                 await _context.SaveChangesAsync();
+
+                foreach (var PrerequisitesId in courseAndTeachers.PrerequisitesId)
+                {
+                    _context.CoursePrerequisites.Add(new()
+                    {
+                        CourseId = courseAndTeachers.Course.ID,
+                        PrerequisiteCourseId = PrerequisitesId
+                    });
+                }
+                await _context.SaveChangesAsync();
+                
                 foreach (var teacherid in courseAndTeachers.TeachersId)
                 {
                     _context.CourseToTeacher.Add(new()
@@ -123,7 +134,7 @@ namespace Course_Scheduler.Controllers
                 return RedirectToAction(nameof(Index));
             }
             ViewData["RequiredCourse"] = _context.Courses.ToList();
-            ViewData["RequiredCourseID"] = new SelectList(_context.Courses, "ID", "ID", courseAndTeachers.Course.PrerequisiteID);
+            
             ViewData["Teachers"] = _context.Teacher.ToList();
 
             return View(courseAndTeachers);
@@ -137,7 +148,7 @@ namespace Course_Scheduler.Controllers
                 return NotFound();
             }
 
-            var course = await _context.Courses.FindAsync(id);
+            var course = await _context.Courses.FirstOrDefaultAsync(c => c.ID == id);
             if (course == null)
             {
                 return NotFound();
@@ -147,10 +158,12 @@ namespace Course_Scheduler.Controllers
             ViewData["RequiredCourse"] = courses;
             ViewData["Teachers"] = _context.Teacher.ToList();
             var techersOfCourse = _context.CourseToTeacher.Where(c => c.CourseID == id).Select(c => c.TeacherID).ToList();
+            var coursePrerequisitesId = _context.CoursePrerequisites.Where(p => p.CourseId == course.ID).Select(p => p.PrerequisiteCourseId).ToList();
             var viewmodel = new AddCourseViewModel()
             {
                 Course = course,
-                TeachersId = techersOfCourse
+                TeachersId = techersOfCourse,
+                PrerequisitesId = coursePrerequisitesId
             };
             return View(viewmodel);
         }
@@ -176,13 +189,28 @@ namespace Course_Scheduler.Controllers
                     {
                         _context.CourseToTeacher.Remove(teacher);
                     }
+                    var removeOldPrerequisitesOfCourse = _context.CoursePrerequisites.Where(c => c.CourseId == viewModel.Course.ID);
+                    foreach (var prerequisite in removeOldPrerequisitesOfCourse)
+                    {
+                        _context.CoursePrerequisites.Remove(prerequisite);
+                    }
+
                     _context.Update(viewModel.Course);
+                    await _context.SaveChangesAsync();
                     foreach (var TeacherId in viewModel.TeachersId)
                     {
                         _context.CourseToTeacher.Add(new()
                         {
                             Course = viewModel.Course,
                             TeacherID = TeacherId
+                        });
+                    }
+                    foreach (var PrerequisiteId in viewModel.PrerequisitesId)
+                    {
+                        _context.CoursePrerequisites.Add(new()
+                        {
+                            CourseId = viewModel.Course.ID,
+                            PrerequisiteCourseId = PrerequisiteId
                         });
                     }
                     await _context.SaveChangesAsync();
@@ -200,7 +228,7 @@ namespace Course_Scheduler.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["RequiredCourseID"] = new SelectList(_context.Courses, "ID", "ID", viewModel.Course.PrerequisiteID);
+            ViewData["RequiredCourse"] = _context.Courses.ToList();
             return View(viewModel);
         }
 
@@ -231,10 +259,15 @@ namespace Course_Scheduler.Controllers
             var course = await _context.Courses.FindAsync(id);
             if (course != null)
             {
-                var coursesToUpdate = _context.Courses.Where(c => c.PrerequisiteID == id);
-                foreach (var item in coursesToUpdate)
+                //var coursesToUpdate = _context.Courses.Where(c => c.PrerequisiteID == id);
+                //foreach (var item in coursesToUpdate)
+                //{
+                //    item.PrerequisiteID = null;
+                //}
+                var coursePrerequisites = _context.CoursePrerequisites.Where(c => c.CourseId == id);
+                foreach (var coursePrerequisite in coursePrerequisites)
                 {
-                    item.PrerequisiteID = null;
+                    _context.CoursePrerequisites.Remove(coursePrerequisite);
                 }
                 var teacherCourse = _context.CourseToTeacher.Where(c => c.CourseID == id);
                 foreach (var item in teacherCourse)
@@ -249,9 +282,9 @@ namespace Course_Scheduler.Controllers
                 }
                 _context.Courses.Remove(course);
 
+                await _context.SaveChangesAsync();
             }
 
-            await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
