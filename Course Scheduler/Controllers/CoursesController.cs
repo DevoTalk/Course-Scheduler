@@ -187,14 +187,13 @@ namespace Course_Scheduler.Controllers
             {
                 return NotFound();
             }
-
             if (!ModelState.IsValid)
             {
                 ViewData["Teachers"] = _context.Teacher.ToList();
                 ViewData["RequiredCourse"] = _context.Courses.ToList();
                 return View(viewModel);
             }
-            var isUnic = await _context.Courses.FirstOrDefaultAsync(c => c.CourseCode == viewModel.Course.CourseCode);
+            var isUnic = await _context.Courses.FirstOrDefaultAsync(c => c.CourseCode == viewModel.Course.CourseCode && c.ID!= viewModel.Course.ID);
             if (isUnic != null)
             {
                 ViewData["RequiredCourse"] = _context.Courses.ToList();

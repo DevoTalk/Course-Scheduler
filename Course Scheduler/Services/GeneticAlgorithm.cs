@@ -151,7 +151,9 @@ public class GeneticAlgorithm
                             {
                                 if (ct.EvenOdd == ct2.EvenOdd)
                                 {
-                                    if (CTT1.Course.Prerequisites.Select(c => c.PrerequisiteCourseId).Order() == CTT2.Course.Prerequisites.Select(c => c.PrerequisiteCourseId).Order())
+                                    if (CTT1.Course.Prerequisites.Select(c => c.PrerequisiteCourseId).Order().ToList().ToList()
+                                        .SequenceEqual(
+                                        CTT2.Course.Prerequisites.Select(c => c.PrerequisiteCourseId).ToList().Order().ToList()))
                                     {
                                         if (!calculatedCoursePenalty
                                             .Any(c => c.Course1 == CTT1.Course && c.Course2 == CTT2.Course ||

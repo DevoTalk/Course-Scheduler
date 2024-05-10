@@ -85,9 +85,9 @@ namespace Course_Scheduler.Controllers
                         if (courseToAdd.ID != course.ID)
                         {
                             var penalty = 0;
-                            var coursePrerequisites = _context.CoursePrerequisites.Where(c => c.ID == course.ID);
-                            var courseToAddPrerequisites = _context.CoursePrerequisites.Where(c => c.ID == courseToAdd.ID);
-                            if (coursePrerequisites.Select(c => c.PrerequisiteCourseId).Order() == courseToAddPrerequisites.Select(c => c.PrerequisiteCourseId).Order())
+                            var coursePrerequisites = _context.CoursePrerequisites.Where(c => c.ID == course.ID).Select(c => c.PrerequisiteCourseId).ToList().Order().ToList();
+                            var courseToAddPrerequisites = _context.CoursePrerequisites.Where(c => c.ID == courseToAdd.ID).Select(c => c.PrerequisiteCourseId).ToList().Order().ToList();
+                            if (coursePrerequisites.SequenceEqual(courseToAddPrerequisites))
                             {
                                 penalty = 1;
                             }
