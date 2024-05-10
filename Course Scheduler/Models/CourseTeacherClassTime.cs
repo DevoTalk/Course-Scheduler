@@ -11,6 +11,7 @@
         public Course Course { get; set; }
         public Teacher Teacher { get; set; }
         public List<EvenOddClassTime> ClassTimes { get; set; }
+        public int SemesterId { get; set; }
 
     }
 }

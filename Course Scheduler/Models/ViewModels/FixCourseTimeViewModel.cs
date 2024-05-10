@@ -13,6 +13,8 @@ namespace Course_Scheduler.Models.ViewModels
         public int TeacherId { get; set; }
         public int CourseCredits { get; set; }
 
+        public int SemesterId { get; set; }
+
         public List<Teacher> Teachers { get; set; }
         public List<EvenOddClassTimeViewModel> Times { get; set; }
     }

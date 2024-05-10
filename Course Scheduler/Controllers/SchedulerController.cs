@@ -17,39 +17,39 @@ namespace Course_Scheduler.Controllers
             _context = context;
         }
 
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
+            ViewData["semester"]= await _context.Semester.ToListAsync();
             return View();
         }
-        public async Task<IActionResult> GeneticAlgorithm(int Count = 100, int UnhealtyCount = 1000) 
+        public async Task<IActionResult> GeneticAlgorithm(int semesterId,int Count = 100, int UnhealtyCount = 1000) 
         {
-            var courses = _context.Courses.ToList();
+            var semester = await _context.Semester.FirstOrDefaultAsync(s => s.ID == semesterId);
+            var coursesId = _context.CourseToSemester
+                .Where(c => c.SemesterID == semesterId)
+                .Select(c => c.CourseID)
+                .ToList();
+            var courses = new List<Course>();
+            foreach (var courseId in coursesId)
+            {
+                courses.Add(await _context.Courses.FirstAsync(c => c.ID == courseId));
+            }
             var courseToTeachers = _context.CourseToTeacher.ToList();
             var coursePenaltys = _context.CoursePenalty.ToList();
             var teachers = _context.Teacher.Include(t => t.PreferredTimes).ToList();
-            var fixedCourses = _context.CourseTeacherClassTime.Include(ctt => ctt.ClassTimes).ToList();
-            var tasks = new List<Task<List<Schedule>>>();
-            //for (int i = 0; i < Count / 10; i++)
-            //{
-            //    GeneticAlgorithm ga = new(courses, courseToTeachers, coursePenaltys, teachers, fixedCourses);
-            //    tasks.Add(ga.GeneratePopulation(10));
-            //}
-            //Parallel.ForEach(Partitioner.Create(0, Count, 10), range =>
-            //{
-            //    for (int i = range.Item1; i < range.Item2; i++)
-            //    {
-            //        GeneticAlgorithm ga = new GeneticAlgorithm(courses, courseToTeachers, coursePenaltys, teachers, fixedCourses);
-            //        tasks.Add(ga.GeneratePopulation(10));
-            //    }
-            //});
-            //await Task.WhenAll(tasks);
+            var fixedCourses = _context.CourseTeacherClassTime
+                .Include(ctt => ctt.ClassTimes)
+                .Where(fc => fc.SemesterId == semesterId)
+                .ToList();
+            var coursePrerequisites = _context.CoursePrerequisites.ToList();
+            
             var schedules = new List<Schedule>();
-            GeneticAlgorithm ga = new GeneticAlgorithm(courses, courseToTeachers, coursePenaltys, teachers, fixedCourses);
+
+            GeneticAlgorithm ga = new GeneticAlgorithm(courses, courseToTeachers, coursePenaltys,
+                teachers, fixedCourses, coursePrerequisites);
+            
             schedules.AddRange(await ga.CreateSchedules(Count,UnhealtyCount));
-            //foreach (var task in tasks)
-            //{
-            //    schedules.AddRange(task.Result);
-            //}
+            
             schedules = schedules.Distinct();
             schedules = schedules.OrderBy(s => s.Penalty.TotalPenalty).ToList();
 

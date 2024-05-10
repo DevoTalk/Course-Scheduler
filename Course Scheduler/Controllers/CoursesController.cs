@@ -27,7 +27,7 @@ namespace Course_Scheduler.Controllers
         public async Task<IActionResult> Index()
         {
             var courseAndTeachersViewModel = new List<CourseAndTeachersViewModel>();
-            var courses = await _context.Courses.Include(c => c.Prerequisite).ToListAsync();
+            var courses = await _context.Courses.ToListAsync();
             foreach (var course in courses)
             {
                 var ctt = await _context.CourseTeacherClassTime.FirstOrDefaultAsync(c => c.Course == course);
@@ -62,7 +62,6 @@ namespace Course_Scheduler.Controllers
             }
 
             var course = await _context.Courses
-                .Include(c => c.Prerequisite)
                 .FirstOrDefaultAsync(m => m.ID == id);
             if (course == null)
             {
@@ -241,7 +240,6 @@ namespace Course_Scheduler.Controllers
             }
 
             var course = await _context.Courses
-                .Include(c => c.Prerequisite)
                 .FirstOrDefaultAsync(m => m.ID == id);
             if (course == null)
             {
@@ -304,12 +302,14 @@ namespace Course_Scheduler.Controllers
                 var freeTimes = await _context.TeacherClassTimeWithPenalties.Where(tp => tp.TeacherId == teacher.ID).ToListAsync();
                 teacher.PreferredTimes = freeTimes;
             }
+            var semesters = await _context.Semester.ToListAsync();
             var fixCourseTimeViewModel = new FixCourseTimeViewModel()
             {
                 CourseId = id,
                 Teachers = teachersOfThisCourse,
                 CourseCredits = course.Credits,
             };
+            ViewBag["semester"] = await _context.Semester.ToListAsync();
             return View(fixCourseTimeViewModel);
         }
         [HttpPost]
@@ -317,6 +317,7 @@ namespace Course_Scheduler.Controllers
         {
             if (!ModelState.IsValid)
             {
+                ViewBag["semester"] = await _context.Semester.ToListAsync();
                 return RedirectToAction(nameof(FixCourseTime), fixCourseTimeViewModel.CourseId);
             }
             var course = await _context.Courses.FirstAsync(c => c.ID == fixCourseTimeViewModel.CourseId);
@@ -325,6 +326,7 @@ namespace Course_Scheduler.Controllers
             {
                 Course = course,
                 Teacher = teacher,
+                SemesterId = fixCourseTimeViewModel.SemesterId,
             };
             await _context.CourseTeacherClassTime.AddAsync(CTT);
             await _context.SaveChangesAsync();

@@ -1,6 +1,8 @@
 ﻿@using Course_Scheduler.Models.Enum
 @model Course_Scheduler.Models.ViewModels.FixCourseTimeViewModel;
-
+@{
+    var semesters = (List<Semester>)ViewData["semester"];
+}
 <div class="container course-scheduler-container">
     <div class="row">
         @foreach (var teacher in Model.Teachers)
@@ -37,6 +39,11 @@
                                         </div>
                                     </div>
                                 </div>
+                            }
+                            @foreach (var semester in semesters)
+                            {
+                                <label for="@semester.ID">@semester.Name</label>
+                                <input type="radio" id="@semester.ID" name="SemesterId" value="@semester.ID" />
                             }
                             <button type="submit" class="btn btn-primary fix-button">Fix Course Time</button>
                         </form>

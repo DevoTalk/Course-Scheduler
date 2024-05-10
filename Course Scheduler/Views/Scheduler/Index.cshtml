@@ -1,5 +1,6 @@
 ﻿@{
     ViewData["Title"] = "Schedule";
+    var semesters =(List<Semester>)ViewData["semester"];
 }
 
 
@@ -20,6 +21,11 @@
             <input name="UnhealtyCount" type="number" class="form-control" placeholder="default 1000" />
         </div>
         <br />
+        @foreach (var semester in semesters)
+        {
+            <label for="@semester.ID">@semester.Name</label>
+            <input type="radio" id="@semester.ID" name="semesterId" value="@semester.ID" />
+        }
         <button class="btn btn-outline-primary" type="submit">Genetic Algorithm</button>
     </form>
 </div>
