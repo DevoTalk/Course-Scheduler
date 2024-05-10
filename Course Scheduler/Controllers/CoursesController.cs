@@ -10,6 +10,7 @@ using Course_Scheduler.Models;
 using Course_Scheduler.Models.ViewModels;
 using NuGet.DependencyResolver;
 using Course_Scheduler.Models.Enum;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 
 namespace Course_Scheduler.Controllers
 {
@@ -96,47 +97,55 @@ namespace Course_Scheduler.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(AddCourseViewModel courseAndTeachers)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                _context.Add(courseAndTeachers.Course);
-                await _context.SaveChangesAsync();
-
-                foreach (var PrerequisitesId in courseAndTeachers.PrerequisitesId)
-                {
-                    _context.CoursePrerequisites.Add(new()
-                    {
-                        CourseId = courseAndTeachers.Course.ID,
-                        PrerequisiteCourseId = PrerequisitesId
-                    });
-                }
-                await _context.SaveChangesAsync();
-                
-                foreach (var teacherid in courseAndTeachers.TeachersId)
-                {
-                    _context.CourseToTeacher.Add(new()
-                    {
-                        Course = courseAndTeachers.Course,
-                        TeacherID = teacherid
-                    });
-                }
-                await _context.SaveChangesAsync();
-                //var courses = await _context.Courses.ToListAsync();
-                //foreach (var course in courses) {
-                //    _context.CoursePenalty.Add(new()
-                //    {
-                //        Course = courseAndTeachers.Course,
-                //        CourseWithPenaltyID = course.ID,
-                //        PenaltyCount = 0
-                //    });
-                //}
-                //await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                ViewData["RequiredCourse"] = _context.Courses.ToList();
+                ViewData["Teachers"] = _context.Teacher.ToList();
+                ModelState.AddModelError("Course.CourseCode", "Course Code mose be UNIQUE");
+                return View(courseAndTeachers);
             }
-            ViewData["RequiredCourse"] = _context.Courses.ToList();
-            
-            ViewData["Teachers"] = _context.Teacher.ToList();
+            var isUnic = await _context.Courses.FirstOrDefaultAsync(c => c.CourseCode == courseAndTeachers.Course.CourseCode);
+            if (isUnic != null)
+            {
+                ViewData["RequiredCourse"] = _context.Courses.ToList();
+                ViewData["Teachers"] = _context.Teacher.ToList();
+                ModelState.AddModelError("Course.CourseCode", "Course Code mose be UNIQUE");
+                return View(courseAndTeachers);
+            }
 
-            return View(courseAndTeachers);
+            _context.Add(courseAndTeachers.Course);
+            await _context.SaveChangesAsync();
+
+            foreach (var PrerequisitesId in courseAndTeachers.PrerequisitesId)
+            {
+                _context.CoursePrerequisites.Add(new()
+                {
+                    CourseId = courseAndTeachers.Course.ID,
+                    PrerequisiteCourseId = PrerequisitesId
+                });
+            }
+            await _context.SaveChangesAsync();
+
+            foreach (var teacherid in courseAndTeachers.TeachersId)
+            {
+                _context.CourseToTeacher.Add(new()
+                {
+                    Course = courseAndTeachers.Course,
+                    TeacherID = teacherid
+                });
+            }
+            await _context.SaveChangesAsync();
+            //var courses = await _context.Courses.ToListAsync();
+            //foreach (var course in courses) {
+            //    _context.CoursePenalty.Add(new()
+            //    {
+            //        Course = courseAndTeachers.Course,
+            //        CourseWithPenaltyID = course.ID,
+            //        PenaltyCount = 0
+            //    });
+            //}
+            //await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Index));
         }
 
         // GET: Courses/Edit/5
@@ -154,8 +163,6 @@ namespace Course_Scheduler.Controllers
             }
             var courses = _context.Courses.ToList();
             courses.Remove(course);
-            ViewData["RequiredCourse"] = courses;
-            ViewData["Teachers"] = _context.Teacher.ToList();
             var techersOfCourse = _context.CourseToTeacher.Where(c => c.CourseID == id).Select(c => c.TeacherID).ToList();
             var coursePrerequisitesId = _context.CoursePrerequisites.Where(p => p.CourseId == course.ID).Select(p => p.PrerequisiteCourseId).ToList();
             var viewmodel = new AddCourseViewModel()
@@ -164,6 +171,8 @@ namespace Course_Scheduler.Controllers
                 TeachersId = techersOfCourse,
                 PrerequisitesId = coursePrerequisitesId
             };
+            ViewData["RequiredCourse"] = courses;
+            ViewData["Teachers"] = _context.Teacher.ToList();
             return View(viewmodel);
         }
 
@@ -179,56 +188,51 @@ namespace Course_Scheduler.Controllers
                 return NotFound();
             }
 
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                try
-                {
-                    var removeOldTecherOfCourse = _context.CourseToTeacher.Where(c => c.CourseID == viewModel.Course.ID);
-                    foreach (var teacher in removeOldTecherOfCourse)
-                    {
-                        _context.CourseToTeacher.Remove(teacher);
-                    }
-                    var removeOldPrerequisitesOfCourse = _context.CoursePrerequisites.Where(c => c.CourseId == viewModel.Course.ID);
-                    foreach (var prerequisite in removeOldPrerequisitesOfCourse)
-                    {
-                        _context.CoursePrerequisites.Remove(prerequisite);
-                    }
-
-                    _context.Update(viewModel.Course);
-                    await _context.SaveChangesAsync();
-                    foreach (var TeacherId in viewModel.TeachersId)
-                    {
-                        _context.CourseToTeacher.Add(new()
-                        {
-                            Course = viewModel.Course,
-                            TeacherID = TeacherId
-                        });
-                    }
-                    foreach (var PrerequisiteId in viewModel.PrerequisitesId)
-                    {
-                        _context.CoursePrerequisites.Add(new()
-                        {
-                            CourseId = viewModel.Course.ID,
-                            PrerequisiteCourseId = PrerequisiteId
-                        });
-                    }
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!CourseExists(viewModel.Course.ID))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
+                ViewData["Teachers"] = _context.Teacher.ToList();
+                ViewData["RequiredCourse"] = _context.Courses.ToList();
+                return View(viewModel);
             }
-            ViewData["RequiredCourse"] = _context.Courses.ToList();
-            return View(viewModel);
+            var isUnic = await _context.Courses.FirstOrDefaultAsync(c => c.CourseCode == viewModel.Course.CourseCode);
+            if (isUnic != null)
+            {
+                ViewData["RequiredCourse"] = _context.Courses.ToList();
+                ViewData["Teachers"] = _context.Teacher.ToList();
+                ModelState.AddModelError("Course.CourseCode", "Course Code mose be UNIQUE");
+                return View(viewModel);
+            }
+            var removeOldTecherOfCourse = _context.CourseToTeacher.Where(c => c.CourseID == viewModel.Course.ID);
+            foreach (var teacher in removeOldTecherOfCourse)
+            {
+                _context.CourseToTeacher.Remove(teacher);
+            }
+            var removeOldPrerequisitesOfCourse = _context.CoursePrerequisites.Where(c => c.CourseId == viewModel.Course.ID);
+            foreach (var prerequisite in removeOldPrerequisitesOfCourse)
+            {
+                _context.CoursePrerequisites.Remove(prerequisite);
+            }
+
+            _context.Update(viewModel.Course);
+            await _context.SaveChangesAsync();
+            foreach (var TeacherId in viewModel.TeachersId)
+            {
+                _context.CourseToTeacher.Add(new()
+                {
+                    Course = viewModel.Course,
+                    TeacherID = TeacherId
+                });
+            }
+            foreach (var PrerequisiteId in viewModel.PrerequisitesId)
+            {
+                _context.CoursePrerequisites.Add(new()
+                {
+                    CourseId = viewModel.Course.ID,
+                    PrerequisiteCourseId = PrerequisiteId
+                });
+            }
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Index));
         }
 
         // GET: Courses/Delete/5

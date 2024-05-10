@@ -20,7 +20,9 @@ namespace Course_Scheduler.Data
                 .HasOne(p => p.Course)
                 .WithMany(c => c.Prerequisites)
                 .HasForeignKey(p => p.CourseId);
-
+            modelBuilder.Entity<Course>()
+                .HasIndex(c=>c.CourseCode)
+                .IsUnique();
             base.OnModelCreating(modelBuilder);
 
         }

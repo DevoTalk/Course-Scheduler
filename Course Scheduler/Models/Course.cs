@@ -13,7 +13,7 @@ namespace Course_Scheduler.Models
         public string Name { get; set; }
         public int Credits { get; set; } = 3;
         public int CountOfClass { get; set; } = 1;
-
+        public string CourseCode { get; set; }
 
 
         public List<CoursePrerequisites> Prerequisites { get; set; }
