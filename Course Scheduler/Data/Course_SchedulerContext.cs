@@ -31,10 +31,11 @@ namespace Course_Scheduler.Data
         public DbSet<Course_Scheduler.Models.Course> Courses { get; set; } = default!;
         public DbSet<Course_Scheduler.Models.CourseToTeacher> CourseToTeacher { get; set; } = default!;
         public DbSet<Course_Scheduler.Models.CoursePenalty> CoursePenalty { get; set; } = default!;
+        public DbSet<Course_Scheduler.Models.CoursePrerequisites> CoursePrerequisites { get; set; } = default!;
+        public DbSet<Course_Scheduler.Models.CorequisiteCourse> CorequisitesCourses { get; set; } = default!;
         public DbSet<Course_Scheduler.Models.TeacherClassTimeWithPenalties> TeacherClassTimeWithPenalties { get; set; } = default!;
         public DbSet<Course_Scheduler.Models.CourseTeacherClassTime> CourseTeacherClassTime { get; set; } = default!;
         public DbSet<Course_Scheduler.Models.EvenOddClassTime> EvenOddClassTime { get; set; } = default!;
-        public DbSet<Course_Scheduler.Models.CoursePrerequisites> CoursePrerequisites { get; set; } = default!;
         public DbSet<Course_Scheduler.Models.Semester> Semester { get; set; } = default!;
         public DbSet<Course_Scheduler.Models.CourseToSemester> CourseToSemester { get; set; } = default!;
 

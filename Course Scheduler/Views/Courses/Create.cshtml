@@ -5,7 +5,7 @@
     List<Teacher> teachers = ViewBag.Teachers;
     var json = Json.Serialize(((List<Course>)ViewData["RequiredCourse"]).Select(c => c.Name));
     var reqIdjson = Json.Serialize(((List<Course>)ViewData["RequiredCourse"]).Select(c => c.ID));
-
+    var reqCodeJson = Json.Serialize(((List<Course>)ViewData["RequiredCourse"]).Select(c => c.CourseCode));
 }
 
 
@@ -46,6 +46,14 @@
                 <ul id="itemList" class="list-group"></ul>
             </div>
             <div class="form-group">
+                <label asp-for="Course.CorequisiteCourses" class="control-label"></label>
+                <div class="input-group mb-3">
+                    <input type="text" id="newCorequisiteCoursesItem" class="form-control" placeholder="Enter item here">
+                    <button onclick="addCorequisiteCoursesItem()" type="button" class="btn btn-primary">Add Item</button>
+                </div>
+                <ul id="CorequisiteCoursesItemList" class="list-group"></ul>
+            </div>
+            <div class="form-group">
                 <label asp-for="TeachersId" class="control-label"></label>
                 <span asp-validation-for="TeachersId" class="text-danger"></span>
                 <br />
@@ -70,42 +78,107 @@
 
 @section Scripts {
     <script>
+        var requiredCourses = @json;
+        var requiredCourseIds = @reqIdjson;
+        var requiredCoursecodes = @reqCodeJson;
+        console.log(RequiredCourse);
+        console.log(requiredCourseIds);
 
         function submitFrom() {
             var from = document.getElementById("addCoursefrom");
             EditNameOfRequiredCourses();
+            EditNameOfCorequisitesCourse();
             from.submit();
         }
 
-        function EditNameOfRequiredCourses(){
+        function EditNameOfRequiredCourses() {
             var inputs = document.querySelectorAll('input[class="requiredCourses"]');
             console.log(inputs);
 
-            inputs.forEach(function(item,index){
+            inputs.forEach(function (item, index) {
                 item.name = `PrerequisitesId[${index}]`
             });
         }
+        function EditNameOfCorequisitesCourse() {
+            var inputs = document.querySelectorAll('input[class="CorequisiteCourses"]');
+            console.log(inputs);
 
-        var requiredCourses = @json
-        var requiredCourseIds = @reqIdjson
-        console.log(RequiredCourse);
-        console.log(requiredCourseIds);
+            inputs.forEach(function (item, index) {
+                item.name = `CorequisitesId[${index}]`
+            });
+        }
 
+        function addCorequisiteCoursesItem() {
+            // Get the text from the input field
+            var newItemText = document.getElementById("newCorequisiteCoursesItem").value;
+            var indexOfNewItemText = requiredCourses.indexOf(newItemText);
+            var indexOfNewItemCode = requiredCoursecodes.indexOf(newItemText);
+            console.log(!newItemText)
+            console.log(indexOfNewItemText === -1)
+            console.log(indexOfNewItemCode === -1)
+            if (!newItemText || (indexOfNewItemText === -1 && indexOfNewItemCode === -1)) return; // Prevent empty items
 
+            // Create a new list item element
+            var newListItem = document.createElement("li");
+            newListItem.classList.add("list-group-item", "d-flex", "justify-content-between", "align-items-center");
+            if (indexOfNewItemCode === -1) {
+                newListItem.textContent = newItemText;
+            } else {
+                newListItem.textContent = requiredCourses[indexOfNewItemCode];;
+            }
+            var newIput = document.createElement("input");
+            if (indexOfNewItemCode === -1) {
+                newIput.value = requiredCourseIds[indexOfNewItemText];
+            } else {
+                newIput.value = requiredCourseIds[indexOfNewItemCode];
+            }
+
+            newIput.type = "hidden";
+            newIput.classList.add("CorequisiteCourses");
+            newListItem.appendChild(newIput);
+
+            // Add a remove button to each list item
+            var removeButton = document.createElement("button");
+            removeButton.classList.add("btn", "btn-sm", "btn-outline-danger");
+            removeButton.textContent = "Remove";
+            removeButton.onclick = function () {
+                this.parentNode.remove();
+            }
+            newListItem.appendChild(removeButton);
+
+            // Add the new list item to the existing list
+            var itemList = document.getElementById("CorequisiteCoursesItemList");
+            itemList.appendChild(newListItem);
+
+            // Clear the input field for the next item
+            document.getElementById("newCorequisiteCoursesItem").value = "";
+            event.preventDefault();
+        }
         function addItem() {
             console.log("test");
             // Get the text from the input field
             var newItemText = document.getElementById("newItem").value;
             var indexOfNewItemText = requiredCourses.indexOf(newItemText);
-            if (!newItemText || indexOfNewItemText === -1) return; // Prevent empty items
+            var indexOfNewItemCode = requiredCoursecodes.indexOf(newItemText);
+            console.log(!newItemText)
+            console.log(indexOfNewItemText === -1)
+            console.log(indexOfNewItemCode === -1)
+            if (!newItemText || (indexOfNewItemText === -1 && indexOfNewItemCode === -1)) return; // Prevent empty items
 
             // Create a new list item element
             var newListItem = document.createElement("li");
             newListItem.classList.add("list-group-item", "d-flex", "justify-content-between", "align-items-center");
-            newListItem.textContent = newItemText;
-
+            if (indexOfNewItemCode === -1) {
+                newListItem.textContent = newItemText;
+            } else {
+                newListItem.textContent = requiredCourses[indexOfNewItemCode];;
+            }
             var newIput = document.createElement("input");
-            newIput.value = requiredCourseIds[indexOfNewItemText];
+            if (indexOfNewItemCode === -1) {
+                newIput.value = requiredCourseIds[indexOfNewItemText];
+            } else {
+                newIput.value = requiredCourseIds[indexOfNewItemCode];
+            }
             newIput.type = "hidden";
             newIput.classList.add("requiredCourses");
             newListItem.appendChild(newIput);
@@ -114,6 +187,7 @@
             var removeButton = document.createElement("button");
             removeButton.classList.add("btn", "btn-sm", "btn-outline-danger");
             removeButton.textContent = "Remove";
+            removeButton.type = "button";
             removeButton.onclick = function () {
                 this.parentNode.remove();
             }
@@ -127,8 +201,9 @@
             document.getElementById("newItem").value = "";
             event.preventDefault();
         }
-         function removeItem() {
-            this.parentNode.remove();
+        function RemoveItem(button) {
+            console.log(button.parentNode)
+            button.parentNode.remove();
         }
     </script>
 
