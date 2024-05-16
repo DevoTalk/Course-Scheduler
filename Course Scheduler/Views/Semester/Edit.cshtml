@@ -2,7 +2,7 @@
 
 
 @{
-    ViewData["Title"] = "Create";
+    ViewData["Title"] = "Edit";
     var json = Json.Serialize(((List<Course>)ViewData["Courses"]).Select(c => c.Name));
     var reqIdjson = Json.Serialize(((List<Course>)ViewData["Courses"]).Select(c => c.ID));
 
@@ -15,6 +15,7 @@
 <div class="row">
     <div class="col-md-4">
         <form id="addCoursefrom" asp-action="Create">
+            <input type="hidden" value="@Model.ID" />
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="form-group">
                 <label asp-for="Name" class="control-label"></label>

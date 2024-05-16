@@ -49,7 +49,7 @@ namespace Course_Scheduler.Controllers
                 });
             }
             await _countext.SaveChangesAsync();
-            return View(nameof(Index));
+            return RedirectToAction(nameof(Index));
         }
 
         public async Task<IActionResult> Edit(int id)
@@ -61,7 +61,8 @@ namespace Course_Scheduler.Controllers
             }
             var viewModel = new AddSemesterViewModel()
             {
-                Name = semeter.Name
+                Name = semeter.Name,
+                ID = id,
             };
             var coursesOfThisSemeterId = await _countext.CourseToSemester
                 .Where(c => c.SemesterID == id)
@@ -70,6 +71,7 @@ namespace Course_Scheduler.Controllers
             viewModel.CoursesId = coursesOfThisSemeterId;
 
             ViewData["Courses"] = await _countext.Courses.ToListAsync();
+            
             return View(viewModel);
         }
         [HttpPost]
@@ -108,7 +110,7 @@ namespace Course_Scheduler.Controllers
                 });
             }
             await _countext.SaveChangesAsync();
-            return View(nameof(Index));
+            return RedirectToAction(nameof(Index));
         }
 
 
@@ -120,7 +122,8 @@ namespace Course_Scheduler.Controllers
                 return NotFound();
             }
             _countext.Semesters.Remove(semeter);
-            return View(nameof(Index));
+            await _countext.SaveChangesAsync();
+            return RedirectToAction(nameof(Index));
         }
     }
 }
