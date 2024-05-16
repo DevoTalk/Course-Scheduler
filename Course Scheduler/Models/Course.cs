@@ -9,6 +9,7 @@ namespace Course_Scheduler.Models
         {
             this.Prerequisites = new();
             this.CorequisiteCourses = new();
+            this.Groups = new();
         }
 
         public string Name { get; set; }
@@ -17,6 +18,7 @@ namespace Course_Scheduler.Models
         public string CourseCode { get; set; }
 
 
+        public List<Group> Groups { get; set; }
         public List<CorequisiteCourse> CorequisiteCourses { get; set; }
         public List<CoursePrerequisites> Prerequisites { get; set; }
     }

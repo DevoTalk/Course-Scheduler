@@ -38,6 +38,7 @@ namespace Course_Scheduler.Data
         public DbSet<Course_Scheduler.Models.EvenOddClassTime> EvenOddClassTime { get; set; } = default!;
         public DbSet<Course_Scheduler.Models.Semester> Semester { get; set; } = default!;
         public DbSet<Course_Scheduler.Models.CourseToSemester> CourseToSemester { get; set; } = default!;
+        public DbSet<Course_Scheduler.Models.Group> Group { get; set; } = default!;
 
     }
 }
