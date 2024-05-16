@@ -22,7 +22,7 @@ namespace Course_Scheduler.Controllers
         // GET: Groups
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Group.ToListAsync());
+            return View(await _context.Groups.ToListAsync());
         }
 
         // GET: Groups/Details/5
@@ -33,7 +33,7 @@ namespace Course_Scheduler.Controllers
                 return NotFound();
             }
 
-            var @group = await _context.Group
+            var @group = await _context.Groups
                 .FirstOrDefaultAsync(m => m.ID == id);
             if (@group == null)
             {
@@ -73,7 +73,7 @@ namespace Course_Scheduler.Controllers
                 return NotFound();
             }
 
-            var @group = await _context.Group.FindAsync(id);
+            var @group = await _context.Groups.FindAsync(id);
             if (@group == null)
             {
                 return NotFound();
@@ -124,7 +124,7 @@ namespace Course_Scheduler.Controllers
                 return NotFound();
             }
 
-            var @group = await _context.Group
+            var @group = await _context.Groups
                 .FirstOrDefaultAsync(m => m.ID == id);
             if (@group == null)
             {
@@ -139,10 +139,10 @@ namespace Course_Scheduler.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var @group = await _context.Group.FindAsync(id);
+            var @group = await _context.Groups.FindAsync(id);
             if (@group != null)
             {
-                _context.Group.Remove(@group);
+                _context.Groups.Remove(@group);
             }
 
             await _context.SaveChangesAsync();
@@ -151,7 +151,7 @@ namespace Course_Scheduler.Controllers
 
         private bool GroupExists(int id)
         {
-            return _context.Group.Any(e => e.ID == id);
+            return _context.Groups.Any(e => e.ID == id);
         }
     }
 }

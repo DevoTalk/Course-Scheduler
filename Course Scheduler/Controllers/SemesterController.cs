@@ -17,7 +17,7 @@ namespace Course_Scheduler.Controllers
 
         public async Task<IActionResult> Index()
         {
-            var semesters = await _countext.Semester.ToListAsync();
+            var semesters = await _countext.Semesters.ToListAsync();
             return View(semesters);
         }
 
@@ -38,7 +38,7 @@ namespace Course_Scheduler.Controllers
             {
                 Name = viewModel.Name
             };
-            await _countext.Semester.AddAsync(semester);
+            await _countext.Semesters.AddAsync(semester);
             await _countext.SaveChangesAsync();
             foreach (var courseId in viewModel.CoursesId)
             {
@@ -54,7 +54,7 @@ namespace Course_Scheduler.Controllers
 
         public async Task<IActionResult> Edit(int id)
         {
-            var semeter = await _countext.Semester.FirstOrDefaultAsync(x => x.ID == id);
+            var semeter = await _countext.Semesters.FirstOrDefaultAsync(x => x.ID == id);
             if (semeter == null)
             {
                 return NotFound();
@@ -84,14 +84,14 @@ namespace Course_Scheduler.Controllers
             {
                 return NotFound();
             }
-            var semester = await _countext.Semester.FirstOrDefaultAsync(s => s.ID == viewModel.ID);
+            var semester = await _countext.Semesters.FirstOrDefaultAsync(s => s.ID == viewModel.ID);
             if(semester == null)
             {
                 return NotFound();
             }
 
             semester.Name = viewModel.Name;
-            _countext.Semester.Update(semester);
+            _countext.Semesters.Update(semester);
             await _countext.SaveChangesAsync();
 
             var oldCoursesOfThisSemester = await _countext.CourseToSemester
@@ -114,12 +114,12 @@ namespace Course_Scheduler.Controllers
 
         public async Task<IActionResult> Delete(int id)
         {
-            var semeter = await _countext.Semester.FirstOrDefaultAsync(x => x.ID == id);
+            var semeter = await _countext.Semesters.FirstOrDefaultAsync(x => x.ID == id);
             if (semeter == null)
             {
                 return NotFound();
             }
-            _countext.Semester.Remove(semeter);
+            _countext.Semesters.Remove(semeter);
             return View(nameof(Index));
         }
     }

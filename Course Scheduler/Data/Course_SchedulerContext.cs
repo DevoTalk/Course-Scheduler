@@ -36,9 +36,10 @@ namespace Course_Scheduler.Data
         public DbSet<Course_Scheduler.Models.TeacherClassTimeWithPenalties> TeacherClassTimeWithPenalties { get; set; } = default!;
         public DbSet<Course_Scheduler.Models.CourseTeacherClassTime> CourseTeacherClassTime { get; set; } = default!;
         public DbSet<Course_Scheduler.Models.EvenOddClassTime> EvenOddClassTime { get; set; } = default!;
-        public DbSet<Course_Scheduler.Models.Semester> Semester { get; set; } = default!;
+        public DbSet<Course_Scheduler.Models.Semester> Semesters { get; set; } = default!;
         public DbSet<Course_Scheduler.Models.CourseToSemester> CourseToSemester { get; set; } = default!;
-        public DbSet<Course_Scheduler.Models.Group> Group { get; set; } = default!;
+        public DbSet<Course_Scheduler.Models.Group> Groups { get; set; } = default!;
+        public DbSet<Course_Scheduler.Models.CourseToGroups> CourseToGroups { get; set; } = default!;
 
     }
 }

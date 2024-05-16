@@ -19,12 +19,12 @@ namespace Course_Scheduler.Controllers
 
         public async Task<IActionResult> Index()
         {
-            ViewData["semester"]= await _context.Semester.ToListAsync();
+            ViewData["semester"]= await _context.Semesters.ToListAsync();
             return View();
         }
         public async Task<IActionResult> GeneticAlgorithm(int semesterId,int Count = 100, int UnhealtyCount = 1000) 
         {
-            var semester = await _context.Semester.FirstOrDefaultAsync(s => s.ID == semesterId);
+            var semester = await _context.Semesters.FirstOrDefaultAsync(s => s.ID == semesterId);
             var coursesId = _context.CourseToSemester
                 .Where(c => c.SemesterID == semesterId)
                 .Select(c => c.CourseID)

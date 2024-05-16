@@ -87,6 +87,7 @@ namespace Course_Scheduler.Controllers
         {
             ViewData["RequiredCourse"] = _context.Courses.ToList();
             ViewData["Teachers"] = _context.Teacher.ToList();
+            ViewData["Groups"] = _context.Groups.ToList();
             return View();
         }
 
@@ -101,6 +102,7 @@ namespace Course_Scheduler.Controllers
             {
                 ViewData["RequiredCourse"] = _context.Courses.ToList();
                 ViewData["Teachers"] = _context.Teacher.ToList();
+                ViewData["Groups"] = _context.Groups.ToList();
                 ModelState.AddModelError("Course.CourseCode", "Course Code mose be UNIQUE");
                 return View(courseAndTeachers);
             }
@@ -109,11 +111,22 @@ namespace Course_Scheduler.Controllers
             {
                 ViewData["RequiredCourse"] = _context.Courses.ToList();
                 ViewData["Teachers"] = _context.Teacher.ToList();
+                ViewData["Groups"] = _context.Groups.ToList();
                 ModelState.AddModelError("Course.CourseCode", "Course Code mose be UNIQUE");
                 return View(courseAndTeachers);
             }
 
             _context.Add(courseAndTeachers.Course);
+            await _context.SaveChangesAsync();
+
+            foreach (var groupId in courseAndTeachers.GroupIds)
+            {
+                _context.CourseToGroups.Add(new()
+                {
+                    CourseId = courseAndTeachers.Course.ID,
+                    GroupId = groupId,
+                });
+            }
             await _context.SaveChangesAsync();
 
             foreach (var PrerequisitesId in courseAndTeachers.PrerequisitesId)
@@ -167,6 +180,7 @@ namespace Course_Scheduler.Controllers
             var techersOfCourse = _context.CourseToTeacher.Where(c => c.CourseID == id).Select(c => c.TeacherID).ToList();
             var coursePrerequisitesId = _context.CoursePrerequisites.Where(p => p.CourseId == course.ID).Select(p => p.PrerequisiteCourseId).ToList();
             var CorequisitesCourseId = _context.CorequisitesCourses.Where(p => p.CourseId == course.ID).Select(p => p.CorequisiteCourseId).ToList();
+            var GroupsOfThisCourse = _context.CourseToGroups.Where(p => p.CourseId == course.ID).Select(p => p.GroupId).ToList();
 
             var viewmodel = new AddCourseViewModel()
             {
@@ -177,6 +191,7 @@ namespace Course_Scheduler.Controllers
             };
             ViewData["RequiredCourse"] = courses;
             ViewData["Teachers"] = _context.Teacher.ToList();
+            ViewData["Groups"] = _context.Groups.ToList();
             return View(viewmodel);
         }
 
@@ -195,6 +210,8 @@ namespace Course_Scheduler.Controllers
             {
                 ViewData["Teachers"] = _context.Teacher.ToList();
                 ViewData["RequiredCourse"] = _context.Courses.ToList();
+                ViewData["Groups"] = _context.Groups.ToList();
+
                 return View(viewModel);
             }
             var isUnic = await _context.Courses.FirstOrDefaultAsync(c => c.CourseCode == viewModel.Course.CourseCode && c.ID != viewModel.Course.ID);
@@ -202,6 +219,8 @@ namespace Course_Scheduler.Controllers
             {
                 ViewData["RequiredCourse"] = _context.Courses.ToList();
                 ViewData["Teachers"] = _context.Teacher.ToList();
+                ViewData["Groups"] = _context.Groups.ToList();
+
                 ModelState.AddModelError("Course.CourseCode", "Course Code mose be UNIQUE");
                 return View(viewModel);
             }
@@ -214,8 +233,22 @@ namespace Course_Scheduler.Controllers
             var removeOldCorequisitesCourse = _context.CorequisitesCourses.Where(c => c.CourseId == viewModel.Course.ID);
             _context.CorequisitesCourses.RemoveRange(removeOldCorequisitesCourse);
 
+            var removeOldGroups = _context.CourseToGroups.Where(p => p.CourseId == viewModel.Course.ID);
+            _context.CourseToGroups.RemoveRange(removeOldGroups);
+
             _context.Update(viewModel.Course);
             await _context.SaveChangesAsync();
+
+            foreach (var groupId in viewModel.GroupIds)
+            {
+                _context.CourseToGroups.Add(new()
+                {
+                    CourseId = viewModel.Course.ID,
+                    GroupId = groupId,
+                });
+            }
+            await _context.SaveChangesAsync();
+
             foreach (var TeacherId in viewModel.TeachersId)
             {
                 _context.CourseToTeacher.Add(new()
@@ -315,14 +348,14 @@ namespace Course_Scheduler.Controllers
                 var freeTimes = await _context.TeacherClassTimeWithPenalties.Where(tp => tp.TeacherId == teacher.ID).ToListAsync();
                 teacher.PreferredTimes = freeTimes;
             }
-            var semesters = await _context.Semester.ToListAsync();
+            var semesters = await _context.Semesters.ToListAsync();
             var fixCourseTimeViewModel = new FixCourseTimeViewModel()
             {
                 CourseId = id,
                 Teachers = teachersOfThisCourse,
                 CourseCredits = course.Credits,
             };
-            ViewBag["semester"] = await _context.Semester.ToListAsync();
+            ViewBag["semester"] = await _context.Semesters.ToListAsync();
             return View(fixCourseTimeViewModel);
         }
         [HttpPost]
@@ -330,7 +363,7 @@ namespace Course_Scheduler.Controllers
         {
             if (!ModelState.IsValid)
             {
-                ViewBag["semester"] = await _context.Semester.ToListAsync();
+                ViewBag["semester"] = await _context.Semesters.ToListAsync();
                 return RedirectToAction(nameof(FixCourseTime), fixCourseTimeViewModel.CourseId);
             }
             var course = await _context.Courses.FirstAsync(c => c.ID == fixCourseTimeViewModel.CourseId);
