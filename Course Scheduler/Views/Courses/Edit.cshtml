@@ -48,7 +48,7 @@
                     @foreach (var item in Model.GroupIds)
                     {
                         <li class="list-group-item d-flex justify-content-between align-items-center">
-                            @(((List<Course>)ViewData["Groups"]).First(c => c.ID == item).Name)
+                            @(((List<Group>)ViewData["Groups"]).First(c => c.ID == item).Name)
                             <input type="hidden" value="@item" class="Group">
                             <button class="btn btn-sm btn-outline-danger" type="button" onclick="RemoveItem(this)">Remove</button>
                         </li>
@@ -126,7 +126,7 @@
         var requiredCoursecodes = @reqCodeJson;
         var groupNames = @groupNames;
         var groupIds = @groupIds;
-        console.log(RequiredCourse);
+        console.log(groupIds);
         console.log(requiredCourseIds);
 
         function submitFrom() {
@@ -167,7 +167,14 @@
             var newItemText = document.getElementById("newGroup").value;
             var indexOfNewItemText = groupNames.indexOf(newItemText);
             var indexOfNewItemCode = groupIds.indexOf(newItemText);
-            console.log(!newItemText)
+            console.log(newItemText)
+            console.log("-------")
+            groupIds.forEach(function (item, index) {
+                if(newItemText == item){
+                    indexOfNewItemCode = index;
+                }
+            });
+            console.log("-------")
             console.log(indexOfNewItemText === -1)
             console.log(indexOfNewItemCode === -1)
             if (!newItemText || (indexOfNewItemText === -1 && indexOfNewItemCode === -1)) return; // Prevent empty items
@@ -178,13 +185,13 @@
             if (indexOfNewItemCode === -1) {
                 newListItem.textContent = newItemText;
             } else {
-                newListItem.textContent = requiredCourses[indexOfNewItemCode];;
+                newListItem.textContent = groupNames[indexOfNewItemCode];;
             }
             var newIput = document.createElement("input");
             if (indexOfNewItemCode === -1) {
-                newIput.value = requiredCourseIds[indexOfNewItemText];
+                newIput.value = groupIds[indexOfNewItemText];
             } else {
-                newIput.value = requiredCourseIds[indexOfNewItemCode];
+                newIput.value = groupIds[indexOfNewItemCode];
             }
 
             newIput.type = "hidden";

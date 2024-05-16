@@ -139,6 +139,11 @@
             console.log(!newItemText)
             console.log(indexOfNewItemText === -1)
             console.log(indexOfNewItemCode === -1)
+            groupIds.forEach(function (item, index) {
+                if (newItemText == item) {
+                    indexOfNewItemCode = index;
+                }
+            });
             if (!newItemText || (indexOfNewItemText === -1 && indexOfNewItemCode === -1)) return; // Prevent empty items
 
             // Create a new list item element
@@ -147,13 +152,13 @@
             if (indexOfNewItemCode === -1) {
                 newListItem.textContent = newItemText;
             } else {
-                newListItem.textContent = requiredCourses[indexOfNewItemCode];;
+                newListItem.textContent = groupNames[indexOfNewItemCode];
             }
             var newIput = document.createElement("input");
             if (indexOfNewItemCode === -1) {
-                newIput.value = requiredCourseIds[indexOfNewItemText];
+                newIput.value = groupIds[indexOfNewItemText];
             } else {
-                newIput.value = requiredCourseIds[indexOfNewItemCode];
+                newIput.value = groupIds[indexOfNewItemCode];
             }
 
             newIput.type = "hidden";

@@ -187,7 +187,8 @@ namespace Course_Scheduler.Controllers
                 Course = course,
                 TeachersId = techersOfCourse,
                 PrerequisitesId = coursePrerequisitesId,
-                CorequisitesId = CorequisitesCourseId
+                CorequisitesId = CorequisitesCourseId,
+                GroupIds = GroupsOfThisCourse,
             };
             ViewData["RequiredCourse"] = courses;
             ViewData["Teachers"] = _context.Teacher.ToList();
