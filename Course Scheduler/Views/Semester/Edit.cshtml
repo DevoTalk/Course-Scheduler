@@ -3,8 +3,10 @@
 
 @{
     ViewData["Title"] = "Edit";
-    var json = Json.Serialize(((List<Course>)ViewData["Courses"]).Select(c => c.Name));
-    var reqIdjson = Json.Serialize(((List<Course>)ViewData["Courses"]).Select(c => c.ID));
+    var courses = (List<Course>)ViewData["Courses"];
+    var json = Json.Serialize((courses).Select(c => c.Name));
+    var reqIdjson = Json.Serialize((courses).Select(c => c.ID));
+    var courseCode = Json.Serialize((courses).Select(c => c.CourseCode));
 
 }
 
@@ -32,7 +34,7 @@
                 @foreach (var item in Model.CoursesId)
                 {
                     <li class="list-group-item d-flex justify-content-between align-items-center">
-                        @(((List<Course>)ViewData["Course"]).First(c => c.ID == item).Name)
+                        @(courses.First(c => c.ID == item).Name)
                         <input type="hidden" value="@item" class="requiredCourses">
                         <button class="btn btn-sm btn-outline-danger" type="button" onclick="RemoveItem(this)">Remove</button>
                     </li>
@@ -69,8 +71,10 @@
 
         var Courses = @json;
         var requiredCourseIds = @reqIdjson;
-        console.log(RequiredCourse);
+        var courseCode = @courseCode;
+        console.log(Courses);
         console.log(requiredCourseIds);
+        console.log(courseCode);
 
 
         function addItem() {
@@ -78,15 +82,23 @@
             // Get the text from the input field
             var newItemText = document.getElementById("newItem").value;
             var indexOfNewItemText = Courses.indexOf(newItemText);
-            if (!newItemText || indexOfNewItemText === -1) return; // Prevent empty items
+            var indexOfNewItemCode = courseCode.indexOf(newItemText);
+            if (!newItemText || (indexOfNewItemText === -1 && indexOfNewItemCode == -1)) return; // Prevent empty items
 
             // Create a new list item element
             var newListItem = document.createElement("li");
             newListItem.classList.add("list-group-item", "d-flex", "justify-content-between", "align-items-center");
-            newListItem.textContent = newItemText;
-
+            if (indexOfNewItemCode == -1) {
+                newListItem.textContent = newItemText;
+            } else {
+                newListItem.textContent = Courses[indexOfNewItemCode];
+            }
             var newIput = document.createElement("input");
-            newIput.value = requiredCourseIds[indexOfNewItemText];
+            if (indexOfNewItemCode == -1) {
+                newIput.value = requiredCourseIds[indexOfNewItemText];
+            } else {
+                newIput.value = requiredCourseIds[indexOfNewItemCode];
+            }
             newIput.type = "hidden";
             newIput.classList.add("CoursesId");
             newListItem.appendChild(newIput);
@@ -112,7 +124,6 @@
             this.parentNode.remove();
         }
     </script>
-
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
