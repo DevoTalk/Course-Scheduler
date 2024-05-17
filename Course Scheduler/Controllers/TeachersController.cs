@@ -36,7 +36,7 @@ namespace Course_Scheduler.Controllers
             }
 
             var teacher = await _context.Teacher
-                .Include(t=>t.PreferredTimes).FirstOrDefaultAsync(m => m.ID == id);
+                .Include(t => t.PreferredTimes).FirstOrDefaultAsync(m => m.ID == id);
             if (teacher == null)
             {
                 return NotFound();
@@ -58,32 +58,40 @@ namespace Course_Scheduler.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(AddTeacherViewModel teacherViewModel)
         {
-            
-            if (ModelState.IsValid)
-            {
-                var teacher = new Teacher()
-                {
-                    Name = teacherViewModel.Name,
-                    MaximumDayCount = teacherViewModel.MaximumDayCount,
-                    PenaltyForEmptyTime = teacherViewModel.PenaltyForEmptyTime,
-                };
-                _context.Add(teacher);
-                await _context.SaveChangesAsync();
 
-                foreach (var pt in teacherViewModel.PreferredTime)
-                {
-                    var teacherPreferredTime = new TeacherClassTimeWithPenalties()
-                    {
-                        Teacher = teacher,
-                        PreferredTime = pt.PreferredTime,
-                        Penalty = pt.Penalty
-                    };
-                    _context.Add(teacherPreferredTime);
-                }
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+            if (!ModelState.IsValid)
+            {
+                return View(teacherViewModel);
             }
-            return View(teacherViewModel);
+            var isUnicCode = await _context.Teacher.FirstOrDefaultAsync(t => t.TeacherCode == teacherViewModel.TeacherCode);
+            if (isUnicCode != null)
+            {
+                ModelState.AddModelError("TeacherCode", "Teacher code must be unique");
+                return View(teacherViewModel);
+            }
+            var teacher = new Teacher()
+            {
+                Name = teacherViewModel.Name,
+                TeacherCode = teacherViewModel.TeacherCode,
+                MaximumDayCount = teacherViewModel.MaximumDayCount,
+                PenaltyForEmptyTime = teacherViewModel.PenaltyForEmptyTime,
+            };
+            _context.Add(teacher);
+            await _context.SaveChangesAsync();
+
+            foreach (var pt in teacherViewModel.PreferredTime)
+            {
+                var teacherPreferredTime = new TeacherClassTimeWithPenalties()
+                {
+                    Teacher = teacher,
+                    PreferredTime = pt.PreferredTime,
+                    Penalty = pt.Penalty
+                };
+                _context.Add(teacherPreferredTime);
+            }
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Index));
+
         }
 
 
@@ -91,7 +99,7 @@ namespace Course_Scheduler.Controllers
         public async Task<IActionResult> Edit(int id)
         {
             var teacher = await _context.Teacher.Include(t => t.PreferredTimes).FirstOrDefaultAsync(t => t.ID == id);
-            if(teacher == null)
+            if (teacher == null)
             {
                 return NotFound();
             }
@@ -108,6 +116,7 @@ namespace Course_Scheduler.Controllers
             {
                 ID = id,
                 Name = teacher.Name,
+                TeacherCode = teacher.TeacherCode,
                 MaximumDayCount = teacher.MaximumDayCount,
                 PenaltyForEmptyTime = teacher.PenaltyForEmptyTime,
                 PreferredTime = preferredTimeViewModel
@@ -118,37 +127,44 @@ namespace Course_Scheduler.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Edit(int id,UpdateTeacherViewModel updateTeacherViewModel)
+        public async Task<IActionResult> Edit(int id, UpdateTeacherViewModel updateTeacherViewModel)
         {
             var teacher = await _context.Teacher.FirstOrDefaultAsync(t => t.ID == id);
             if (teacher == null)
             {
                 return NotFound();
             }
-            if(ModelState.IsValid)
+
+            var isUnique = await _context.Teacher.FirstOrDefaultAsync(t => t.ID != id && t.TeacherCode == updateTeacherViewModel.TeacherCode);
+            if (isUnique != null)
             {
-                teacher.Name = updateTeacherViewModel.Name;
-                teacher.MaximumDayCount = updateTeacherViewModel.MaximumDayCount;
-                teacher.PenaltyForEmptyTime = updateTeacherViewModel.PenaltyForEmptyTime;
-                _context.Update(teacher);
-
-                var oldTimes = _context.TeacherClassTimeWithPenalties.Where(t => t.TeacherId == id).ToList();
-                _context.TeacherClassTimeWithPenalties.RemoveRange(oldTimes);
-                foreach (var item in updateTeacherViewModel.PreferredTime)
-                {
-                    _context.TeacherClassTimeWithPenalties.Add(new()
-                    {
-                        PreferredTime = item.PreferredTime,
-                        Penalty = item.Penalty,
-                        TeacherId = id,
-                        Teacher = teacher
-                    });
-                }
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                ModelState.AddModelError("TeacherCode", "Teacher code must be unique");
+                return View(updateTeacherViewModel);
             }
-            return View(updateTeacherViewModel);
+            if (!ModelState.IsValid)
+            {
+                return View(updateTeacherViewModel);
+            }
+            teacher.Name = updateTeacherViewModel.Name;
+            teacher.TeacherCode = updateTeacherViewModel.TeacherCode;
+            teacher.MaximumDayCount = updateTeacherViewModel.MaximumDayCount;
+            teacher.PenaltyForEmptyTime = updateTeacherViewModel.PenaltyForEmptyTime;
+            _context.Update(teacher);
 
+            var oldTimes = _context.TeacherClassTimeWithPenalties.Where(t => t.TeacherId == id).ToList();
+            _context.TeacherClassTimeWithPenalties.RemoveRange(oldTimes);
+            foreach (var item in updateTeacherViewModel.PreferredTime)
+            {
+                _context.TeacherClassTimeWithPenalties.Add(new()
+                {
+                    PreferredTime = item.PreferredTime,
+                    Penalty = item.Penalty,
+                    TeacherId = id,
+                    Teacher = teacher
+                });
+            }
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Index));
         }
 
 

@@ -2,7 +2,10 @@
 
 @{
     ViewData["Title"] = "Edit";
-    List<Teacher> teachers = ViewBag.Teachers;
+
+    var teacherNames = Json.Serialize(((List<Teacher>)ViewBag.Teachers).Select(t => t.Name));
+    var teachercodes = Json.Serialize(((List<Teacher>)ViewBag.Teachers).Select(t => t.TeacherCode));
+    var teacherIds = Json.Serialize(((List<Teacher>)ViewBag.Teachers).Select(t => t.ID));
     var json = Json.Serialize(((List<Course>)ViewData["RequiredCourse"]).Select(c => c.Name));
     var reqIdjson = Json.Serialize(((List<Course>)ViewData["RequiredCourse"]).Select(c => c.ID));
     var reqCodeJson = Json.Serialize(((List<Course>)ViewData["RequiredCourse"]).Select(c => c.CourseCode));
@@ -94,18 +97,26 @@
                 <span asp-validation-for="Course.CorequisiteCourses" class="text-danger"></span>
 
             </div>
+
             <div class="form-group">
                 <label asp-for="TeachersId" class="control-label"></label>
+                <div class="input-group mb-3">
+                    <input type="text" id="newTeacher" class="form-control" placeholder="Enter item here">
+                    <button onclick="addTeacher()" type="button" class="btn btn-primary">Add Item</button>
+                </div>
+                <ul id="TeacherList" class="list-group">
+                    @foreach (var item in Model.TeachersId)
+                    {
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            @(((List<Teacher>)ViewBag.Teachers).First(c => c.ID == item).Name)
+                            <input type="hidden" value="@item" class="teachers">
+                            <button class="btn btn-sm btn-outline-danger" type="button" onclick="RemoveItem(this)">Remove</button>
+                        </li>
+                    }
+                </ul>
                 <span asp-validation-for="TeachersId" class="text-danger"></span>
-                <br />
-                @foreach (var item in teachers)
-                {
-                    <div class="form-check form-check-inline">
-                        <label class="form-check-label" for="@($"chk{item.Name}")">@item.Name</label>
-                        <input class="form-check-input" type="checkbox" id="@($"chk{item.ID}")" name="TeachersId" value="@item.ID" @(Model.TeachersId.Contains(item.ID) ? "checked" : "")>
-                    </div>
-                }
             </div>
+
             <input type="hidden" asp-for="Course.ID" />
             <div class="form-group">
                 <input type="button" onclick="submitFrom()" value="Save" class="btn btn-primary" />
@@ -126,14 +137,18 @@
         var requiredCoursecodes = @reqCodeJson;
         var groupNames = @groupNames;
         var groupIds = @groupIds;
-        console.log(groupIds);
-        console.log(requiredCourseIds);
+        var teacherNaems = @teacherNames;
+        var teacherCodes = @teachercodes;
+        var teacherIds = @teacherIds;
+        console.log(teacherNames);
+        console.log(teachercodes);
 
         function submitFrom() {
             var from = document.getElementById("addCoursefrom");
             EditNameOfRequiredCourses();
             EditNameOfCorequisitesCourse();
             EditNameOfGroups();
+            EditNameOfTeachers();
             from.submit();
         }
 
@@ -161,6 +176,64 @@
                 item.name = `CorequisitesId[${index}]`
             });
         }
+
+        function EditNameOfTeachers() {
+            var inputs = document.querySelectorAll('input[class="teachers"]');
+            console.log(inputs);
+
+            inputs.forEach(function (item, index) {
+                item.name = `TeachersId[${index}]`
+            });
+        }
+
+        function addTeacher() {
+            // Get the text from the input field
+            var newItemText = document.getElementById("newTeacher").value;
+            var indexOfNewItemText = teacherNaems.indexOf(newItemText);
+            var indexOfNewItemCode = teacherCodes.indexOf(newItemText);
+            console.log(!newItemText)
+            console.log(indexOfNewItemText === -1)
+            console.log(indexOfNewItemCode === -1)
+
+            if (!newItemText || (indexOfNewItemText === -1 && indexOfNewItemCode === -1)) return; // Prevent empty items
+
+            // Create a new list item element
+            var newListItem = document.createElement("li");
+            newListItem.classList.add("list-group-item", "d-flex", "justify-content-between", "align-items-center");
+            if (indexOfNewItemCode === -1) {
+                newListItem.textContent = newItemText;
+            } else {
+                newListItem.textContent = teacherNaems[indexOfNewItemCode];
+            }
+            var newIput = document.createElement("input");
+            if (indexOfNewItemCode === -1) {
+                newIput.value = teacherIds[indexOfNewItemText];
+            } else {
+                newIput.value = teacherIds[indexOfNewItemCode];
+            }
+
+            newIput.type = "hidden";
+            newIput.classList.add("teachers");
+            newListItem.appendChild(newIput);
+
+            // Add a remove button to each list item
+            var removeButton = document.createElement("button");
+            removeButton.classList.add("btn", "btn-sm", "btn-outline-danger");
+            removeButton.textContent = "Remove";
+            removeButton.onclick = function () {
+                this.parentNode.remove();
+            }
+            newListItem.appendChild(removeButton);
+
+            // Add the new list item to the existing list
+            var itemList = document.getElementById("TeacherList");
+            itemList.appendChild(newListItem);
+
+            // Clear the input field for the next item
+            document.getElementById("newTeacher").value = "";
+            event.preventDefault();
+        }
+
 
         function addGroup() {
             // Get the text from the input field

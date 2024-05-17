@@ -9,6 +9,7 @@ namespace Course_Scheduler.Models.ViewModels
             this.PreferredTime = new();
         }
         public string Name { get; set; }
+        public string TeacherCode { get; set; }
         public int MaximumDayCount { get; set; }
         public int PenaltyForEmptyTime { get; set; } = 1;
 

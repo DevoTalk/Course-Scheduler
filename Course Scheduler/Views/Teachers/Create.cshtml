@@ -17,6 +17,11 @@
             <span asp-validation-for="Name" class="text-danger"></span>
         </div>
         <div class="form-group">
+            <label asp-for="TeacherCode" class="control-label"></label>
+            <input asp-for="TeacherCode" class="form-control" />
+            <span asp-validation-for="TeacherCode" class="text-danger"></span>
+        </div>
+        <div class="form-group">
             <label asp-for="MaximumDayCount" class="control-label"></label>
             <input asp-for="MaximumDayCount" class="form-control" />
             <span asp-validation-for="MaximumDayCount" class="text-danger"></span>
@@ -52,7 +57,7 @@
                             <input type="hidden" id="PreferredTimeValue(@i)" value="@time">
                         </td>
                         <td>
-                            <input type="number" class="penaltyInput" asp-for=PreferredTime[i].Penalty min="0" id="PreferredTimePenalty(@i)" index="@i" disabled>
+                            <input type="number" class="penaltyInput"  min="0" id="PreferredTimePenalty(@i)" index1="@i" disabled>
                         </td>
                     </tr>
                 }
@@ -85,7 +90,7 @@
                 
                 var hiddenInput = document.createElement('input');
                 hiddenInput.type = 'hidden';
-                hiddenInput.name = penaltyInput.name; // Assign the same name
+                hiddenInput.name = 'PreferredTime[' + index + '].Penalty'; // Assign the same name
                 hiddenInput.value = penaltyInput.value; // Assign the same value
                 hiddenInput.id = 'HiddenPreferredTimePenalty(' + index + ')';
                 hiddenInput.className = 'PenaltyInput';
@@ -126,7 +131,7 @@
             form.submit();
         }
         $(".penaltyInput").on("change", function () {
-            var index = this.getAttribute("index");
+            var index = this.getAttribute("index1");
             var penaltyInput = document.getElementById('PreferredTimePenalty(' + index + ')');
             var hiddenInput = document.getElementById('HiddenPreferredTimePenalty(' + index + ')');
             hiddenInput.value = penaltyInput.value;

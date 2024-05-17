@@ -10,6 +10,7 @@ public class Teacher : Base
         PreferredTimes = new List<TeacherClassTimeWithPenalties>();
     }
     public string Name { get; set; }
+    public string TeacherCode { get; set; }
     public List<TeacherClassTimeWithPenalties> PreferredTimes{ get; set; }
     public int MaximumDayCount { get; set; }
     public int PenaltyForEmptyTime { get; set; } = 1;

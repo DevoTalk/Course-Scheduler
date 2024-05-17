@@ -103,7 +103,6 @@ namespace Course_Scheduler.Controllers
                 ViewData["RequiredCourse"] = _context.Courses.ToList();
                 ViewData["Teachers"] = _context.Teacher.ToList();
                 ViewData["Groups"] = _context.Groups.ToList();
-                ModelState.AddModelError("Course.CourseCode", "Course Code mose be UNIQUE");
                 return View(courseAndTeachers);
             }
             var isUnic = await _context.Courses.FirstOrDefaultAsync(c => c.CourseCode == courseAndTeachers.Course.CourseCode);
@@ -115,7 +114,14 @@ namespace Course_Scheduler.Controllers
                 ModelState.AddModelError("Course.CourseCode", "Course Code mose be UNIQUE");
                 return View(courseAndTeachers);
             }
-
+            if (courseAndTeachers.TeachersId.Count == 0)
+            {
+                ViewData["RequiredCourse"] = _context.Courses.ToList();
+                ViewData["Teachers"] = _context.Teacher.ToList();
+                ViewData["Groups"] = _context.Groups.ToList();
+                ModelState.AddModelError("TeachersId", "please add a teacher");
+                return View(courseAndTeachers);
+            }
             _context.Add(courseAndTeachers.Course);
             await _context.SaveChangesAsync();
 
@@ -223,6 +229,14 @@ namespace Course_Scheduler.Controllers
                 ViewData["Groups"] = _context.Groups.ToList();
 
                 ModelState.AddModelError("Course.CourseCode", "Course Code mose be UNIQUE");
+                return View(viewModel);
+            }
+            if (viewModel.TeachersId.Count == 0)
+            {
+                ViewData["RequiredCourse"] = _context.Courses.ToList();
+                ViewData["Teachers"] = _context.Teacher.ToList();
+                ViewData["Groups"] = _context.Groups.ToList();
+                ModelState.AddModelError("TeachersId", "please add a teacher");
                 return View(viewModel);
             }
             var removeOldTecherOfCourse = _context.CourseToTeacher.Where(c => c.CourseID == viewModel.Course.ID);
