@@ -32,7 +32,11 @@ namespace Course_Scheduler.Controllers
             var courses = new List<Course>();
             foreach (var courseId in coursesId)
             {
-                courses.Add(await _context.Courses.FirstAsync(c => c.ID == courseId));
+                courses.Add(await _context.Courses
+                    .Include(c => c.Groups)
+                    .Include(c => c.Prerequisites)
+                    .Include(c => c.CorequisiteCourses)
+                    .FirstAsync(c => c.ID == courseId));
             }
             var courseToTeachers = _context.CourseToTeacher.ToList();
             var coursePenaltys = _context.CoursePenalty.ToList();
@@ -50,7 +54,6 @@ namespace Course_Scheduler.Controllers
             
             schedules.AddRange(await ga.CreateSchedules(Count,UnhealtyCount));
             
-            schedules = schedules.Distinct();
             schedules = schedules.OrderBy(s => s.Penalty.TotalPenalty).ToList();
 
 

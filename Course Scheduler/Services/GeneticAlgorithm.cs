@@ -1,10 +1,7 @@
 ﻿using Course_Scheduler.Models;
 using Course_Scheduler.Models.Enum;
-using DocumentFormat.OpenXml.Office2010.ExcelAc;
-using NuGet.DependencyResolver;
+using Newtonsoft.Json;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Course_Scheduler.Services;
 
@@ -18,6 +15,7 @@ public class GeneticAlgorithm
     public List<Teacher> Teachers { get; set; }
     public List<CourseTeacherClassTime> FixedCourses { get; set; }
     public List<CoursePrerequisites> CoursePrerequisites { get; set; }
+
     public GeneticAlgorithm(List<Course> courses, List<CourseToTeacher> courseToTeacher, List<CoursePenalty> coursePenalties,
         List<Teacher> teachers, List<CourseTeacherClassTime> fixedCourses, List<CoursePrerequisites> coursePrerequisites)
     {
@@ -36,6 +34,7 @@ public class GeneticAlgorithm
         }
     }
     #endregion
+
     #region ClassTimeComparer
     private class CalculatedCoursePenalty
     {
@@ -64,18 +63,18 @@ public class GeneticAlgorithm
     public Penalty CalculatePenalty(Schedule schedule)
     {
         var penalty = new Penalty();
-        penalty.PenaltyOfOverlay = PenaltyOfOverlay(schedule.CourseTeacherClassTimes);
-        penalty.PenaltyOfTeacher = PenaltyOfTeacher(schedule.CourseTeacherClassTimes);
-        penalty.PenaltyOfMaximumCountOfClassInSection = PenaltyOfMaximumCountOfClassInSection(schedule.CourseTeacherClassTimes);
+        penalty.PenaltyOfOverlay = PenaltyOfOverlay(schedule);
+        penalty.PenaltyOfTeacher = TotallPenaltyOfTeachers(schedule);
+        penalty.PenaltyOfMaximumCountOfClassInSection = PenaltyOfMaximumCountOfClassInSection(schedule);
         penalty.TotalPenalty = penalty.PenaltyOfOverlay + penalty.PenaltyOfTeacher + penalty.PenaltyOfMaximumCountOfClassInSection;
         return penalty;
     }
 
-    private int PenaltyOfMaximumCountOfClassInSection(List<CourseTeacherClassTime> courseTeacherClassTimes)
+    private int PenaltyOfMaximumCountOfClassInSection(Schedule schedule)
     {
         int penalty = 0;
 
-        var sections = courseTeacherClassTimes.SelectMany(ctt => ctt.ClassTimes).Select(t => t.ClassTime).ToList();
+        var sections = schedule.CourseTeacherClassTimes.SelectMany(ctt => ctt.ClassTimes).Select(t => t.ClassTime).ToList();
 
         var sectionAndCount = sections.GroupBy(x => x)
             .Select(g => new { Value = g.Key, Count = g.Count() });
@@ -85,18 +84,36 @@ public class GeneticAlgorithm
         {
             if (section.Count > maximumCountOfClass)
             {
-                penalty += (section.Count - maximumCountOfClass);
+                penalty += (section.Count - maximumCountOfClass) * 2;
             }
         }
         return penalty;
     }
 
-    private int PenaltyOfTeacher(List<CourseTeacherClassTime> CourseTeacherClassTimes)
+    private int TotallPenaltyOfTeachers(Schedule schedule)
     {
         var penalties = new Dictionary<Teacher, int>();
         var totalPenalty = 0;
 
-        foreach (var courseTeacherClassTime in CourseTeacherClassTimes)
+        foreach (var courseTeacherClassTime in schedule.CourseTeacherClassTimes)
+        {
+            var teacher = courseTeacherClassTime.Teacher;
+            if (!penalties.ContainsKey(teacher))
+            {
+                penalties[teacher] = PenaltyOfSpecificTeacher(schedule, teacher);
+            }
+        }
+        foreach (var item in penalties)
+        {
+            totalPenalty += item.Value;
+        }
+        return totalPenalty;
+    }
+    private Dictionary<Teacher, int> PenaltyOfTeachers(Schedule schedule)
+    {
+        var penalties = new Dictionary<Teacher, int>();
+
+        foreach (var courseTeacherClassTime in schedule.CourseTeacherClassTimes)
         {
             var teacher = courseTeacherClassTime.Teacher;
             if (!penalties.ContainsKey(teacher))
@@ -126,49 +143,87 @@ public class GeneticAlgorithm
                 penalties[teacher] += penaltieOfTime;
             }
         }
-
-        foreach (var item in penalties)
-        {
-            totalPenalty += item.Value;
-        }
-        return totalPenalty;
+        return penalties;
     }
-    private int PenaltyOfOverlay(List<CourseTeacherClassTime> CourseTeacherClassTimes)
+    private int PenaltyOfSpecificTeacher(Schedule schedule, Teacher specificTeacher)
+    {
+        int penalty = 0;
+
+        var courseTeacherClassTimes = schedule.CourseTeacherClassTimes
+            .Where(ctct => ctct.Teacher.ID == specificTeacher.ID);
+
+        foreach (var courseTeacherClassTime in courseTeacherClassTimes)
+        {
+            var classTimes = courseTeacherClassTime.ClassTimes
+                .Select(ct => ct.ClassTime)
+                .OrderBy(ct => ct)
+                .ToList();
+
+            for (int i = 0; i < classTimes.Count - 1; i++)
+            {
+                var currentClass = classTimes[i];
+                var nextClass = classTimes[i + 1];
+
+                // Check if classes are not consecutive and on the same day
+                var distanceOfTimes = nextClass - currentClass;
+                if (distanceOfTimes > 1)
+                {
+                    if (AreOnSameDay(currentClass, nextClass))
+                    {
+                        penalty += specificTeacher.PenaltyForEmptyTime;
+                    }
+                }
+            }
+
+            foreach (var classTime in classTimes)
+            {
+                var penaltieOfTime = specificTeacher.PreferredTimes
+                    .FirstOrDefault(t => t.PreferredTime == classTime)?.Penalty ?? 0;
+                penalty += penaltieOfTime;
+            }
+        }
+
+        return penalty;
+    }
+    private int PenaltyOfOverlay(Schedule schedule)
     {
         var penalty = 0;
         var calculatedCoursePenalty = new List<CalculatedCoursePenalty>();
-        foreach (var CTT1 in CourseTeacherClassTimes)
+        foreach (var CTT1 in schedule.CourseTeacherClassTimes)
         {
-            foreach (var CTT2 in CourseTeacherClassTimes)
+            foreach (var CTT2 in schedule.CourseTeacherClassTimes)
             {
                 if (CTT1 != CTT2)
                 {
-                    foreach (var ct in CTT1.ClassTimes)
+                    if (CTT1.Course.Groups.Intersect(CTT2.Course.Groups).Any())
                     {
-                        foreach (var ct2 in CTT2.ClassTimes)
+                        foreach (var ct in CTT1.ClassTimes)
                         {
-                            if (ct.ClassTime == ct2.ClassTime)
+                            foreach (var ct2 in CTT2.ClassTimes)
                             {
-                                if (ct.EvenOdd == ct2.EvenOdd)
+                                if (ct.ClassTime == ct2.ClassTime)
                                 {
-                                    if (CTT1.Course.Prerequisites.Select(c => c.PrerequisiteCourseId).Order().ToList().ToList()
-                                        .SequenceEqual(
-                                        CTT2.Course.Prerequisites.Select(c => c.PrerequisiteCourseId).ToList().Order().ToList()))
+                                    if (ct.EvenOdd == ct2.EvenOdd || ct.EvenOdd == EvenOdd.everyWeek || ct2.EvenOdd == EvenOdd.everyWeek)
                                     {
-                                        if (!calculatedCoursePenalty
-                                            .Any(c => c.Course1 == CTT1.Course && c.Course2 == CTT2.Course ||
-                                                c.Course1 == CTT2.Course && c.Course2 == CTT1.Course))
+                                        if (CTT1.Course.Prerequisites.Select(c => c.PrerequisiteCourseId).Order().ToList().ToList()
+                                            .SequenceEqual(
+                                            CTT2.Course.Prerequisites.Select(c => c.PrerequisiteCourseId).ToList().Order().ToList()))
                                         {
-
-                                            penalty += CoursePenalties.First(
-                                                c => c.CourseID == CTT1.Course.ID && c.CourseWithPenaltyID == CTT2.Course.ID ||
-                                                c.CourseID == CTT2.Course.ID && c.CourseWithPenaltyID == CTT1.Course.ID).PenaltyCount;
-
-                                            calculatedCoursePenalty.Add(new()
+                                            if (!calculatedCoursePenalty
+                                                .Any(c => c.Course1 == CTT1.Course && c.Course2 == CTT2.Course ||
+                                                    c.Course1 == CTT2.Course && c.Course2 == CTT1.Course))
                                             {
-                                                Course1 = CTT1.Course,
-                                                Course2 = CTT2.Course,
-                                            });
+
+                                                penalty += CoursePenalties.First(
+                                                    c => c.CourseID == CTT1.Course.ID && c.CourseWithPenaltyID == CTT2.Course.ID ||
+                                                    c.CourseID == CTT2.Course.ID && c.CourseWithPenaltyID == CTT1.Course.ID).PenaltyCount;
+
+                                                calculatedCoursePenalty.Add(new()
+                                                {
+                                                    Course1 = CTT1.Course,
+                                                    Course2 = CTT2.Course,
+                                                });
+                                            }
                                         }
                                     }
                                 }
@@ -181,22 +236,41 @@ public class GeneticAlgorithm
         return penalty;
     }
     #endregion
-
-    public async Task<List<Schedule>> CreateSchedules(int Count = 100, int UnhealtyCount = 1000)
+    public Schedule DeepCopy(Schedule schedule)
     {
-        var schedules = new List<Schedule>();
-
-
-        //Parallel.For(0, 10, i =>
-        //{
-            //schedules.AddRange(GeneratePopulation(Count/10, UnhealtyCount/10));
-        ;//});
-        schedules.AddRange(GeneratePopulation(Count, UnhealtyCount));
-
-
-        return schedules;
+        var jsonSettings = new JsonSerializerSettings
+        {
+            ReferenceLoopHandling = ReferenceLoopHandling.Ignore
+        };
+        string json = JsonConvert.SerializeObject(schedule, jsonSettings);
+        return JsonConvert.DeserializeObject<Schedule>(json);
     }
-    public  List<Schedule> GeneratePopulation(int Count = 100,int UnhealtyCount = 1000)
+    public async Task<List<Schedule>> CreateSchedules(int count = 100, int unhealthyCount = 1000)
+    {
+        var allSchedules = new ConcurrentBag<Schedule>();
+
+        //var tasks = Enumerable.Range(0, 10).Select(async _ =>
+        //{
+        //    var schedules = GeneratePopulation(count, unhealthyCount).Take(10);
+        //    foreach (var schedule in schedules)
+        //    {
+        //        var optimizedSchedule = await Task.Run(() => Optimizer(schedule));
+        //        allSchedules.Add(optimizedSchedule);
+        //        //allSchedules.Add(schedule);
+        //    }
+        //});
+
+        //await Task.WhenAll(tasks);
+        var scs=GeneratePopulation(count, unhealthyCount).Take(10);
+        foreach (var item in scs)
+        {
+            var _ = Optimizer(item);
+            allSchedules.Add(_);
+        }
+        return allSchedules.Distinct().ToList();
+    }
+
+    public List<Schedule> GeneratePopulation(int Count = 100, int UnhealtyCount = 1000)
     {
         var schedules = new List<Schedule>();
         var count = 0;
@@ -249,7 +323,7 @@ public class GeneticAlgorithm
                 CTT.Course = SelectCourse(courentCourseList, courentCourseSelected);
                 courentCourseSelected.Add(CTT.Course);
 
-                var teacherOfThisCourse = CourseToTeacher.Where(ct => ct.CourseID == CTT.Course.ID).ToList();
+                var teachersOfThisCourse = CourseToTeacher.Where(ct => ct.CourseID == CTT.Course.ID).ToList();
 
                 var rnd = new Random();
 
@@ -257,52 +331,47 @@ public class GeneticAlgorithm
                 Teacher teacher = new();
                 while (!thisTeacherCanTakeCourse)
                 {
-                    if (teacherOfThisCourse.Count() != 0)
+                    if (teachersOfThisCourse.Count() == 0)
                     {
-                        var teacherId = teacherOfThisCourse[rnd.Next(teacherOfThisCourse.Count())].TeacherID;
-                        teacher = courentTeacherList.First(t => t.ID == teacherId);
 
-                        var countOfFreetimeOfTeacherEveryWeek = teacher.PreferredTimes.Where(t => t.EvenOdd == EvenOdd.everyWeek).Count();
-                        var countOfFreeTimeOfTecherEvenOdd = teacher.PreferredTimes.Where(t => t.EvenOdd != EvenOdd.everyWeek).Count();
+                        isHealthy = false;
+                        break;
+                    }
+                    var teacherId = teachersOfThisCourse[rnd.Next(teachersOfThisCourse.Count())].TeacherID;
+                    teacher = courentTeacherList.First(t => t.ID == teacherId);
+
+                    var countOfFreetimeOfTeacherEveryWeek = teacher.PreferredTimes.Where(t => t.EvenOdd == EvenOdd.everyWeek).Count();
+                    var countOfFreeTimeOfTecherEvenOdd = teacher.PreferredTimes.Where(t => t.EvenOdd != EvenOdd.everyWeek).Count();
 
 
-                        int countOfClassNeedInEveryWeek;
-                        if (CTT.Course.Credits == 1)
+                    int countOfClassNeedInEveryWeek;
+                    if (CTT.Course.Credits == 1)
+                    {
+                        countOfClassNeedInEveryWeek = 1;
+                    }
+                    else
+                    {
+                        countOfClassNeedInEveryWeek = CTT.Course.Credits / 2;
+                    }
+
+                    if (countOfFreetimeOfTeacherEveryWeek < countOfClassNeedInEveryWeek)
+                    {
+                        teachersOfThisCourse.Remove(teachersOfThisCourse.First(tc => tc.TeacherID == teacherId));
+                    }
+                    if (CTT.Course.Credits % 2 == 1)
+                    {
+                        if ((countOfFreetimeOfTeacherEveryWeek - CTT.Course.Credits / 2) + countOfFreeTimeOfTecherEvenOdd > 0)
                         {
-                            countOfClassNeedInEveryWeek = 1;
+                            thisTeacherCanTakeCourse = true;
                         }
                         else
                         {
-                            countOfClassNeedInEveryWeek = CTT.Course.Credits / 2;
-                        }
-
-                        if (countOfFreetimeOfTeacherEveryWeek >= countOfClassNeedInEveryWeek)
-                        {
-                            if (CTT.Course.Credits % 2 == 1)
-                            {
-                                if ((countOfFreetimeOfTeacherEveryWeek - CTT.Course.Credits / 2) + countOfFreeTimeOfTecherEvenOdd > 0)
-                                {
-                                    thisTeacherCanTakeCourse = true;
-                                }
-                                else
-                                {
-                                    teacherOfThisCourse.Remove(teacherOfThisCourse.First(tc => tc.TeacherID == teacherId));
-                                }
-                            }
-                            else
-                            {
-                                thisTeacherCanTakeCourse = true;
-                            }
-                        }
-                        else
-                        {
-                            teacherOfThisCourse.Remove(teacherOfThisCourse.First(tc => tc.TeacherID == teacherId));
+                            teachersOfThisCourse.Remove(teachersOfThisCourse.First(tc => tc.TeacherID == teacherId));
                         }
                     }
                     else
                     {
-                        isHealthy = false;
-                        break;
+                        thisTeacherCanTakeCourse = true;
                     }
                 }
                 if (isHealthy)
@@ -388,15 +457,20 @@ public class GeneticAlgorithm
                     schedule.CourseTeacherClassTimes.Add(CTT);
                 }
             }
-            if (isHealthy && IsMaxDayCountOfTeacherExceeded(schedule))
+            if (isHealthy && AreRequirementsMet(schedule))
             {
                 var penalty = CalculatePenalty(schedule);
                 schedule.Penalty = penalty;
+
+                var schedulesCount = schedules.Count;
                 schedules.Add(schedule);
                 schedules.Distinct();
-                count++;
-                Console.WriteLine("schedules is created");
-                Console.WriteLine(schedules.Count());
+                if (schedules.Count > schedulesCount)
+                {
+                    count++;
+                    Console.WriteLine("schedules is created penalty = " + schedule.Penalty.TotalPenalty);
+                    Console.WriteLine(schedules.Count());
+                }
             }
             else
             {
@@ -406,29 +480,82 @@ public class GeneticAlgorithm
         return schedules;
     }
 
-    private Schedule AddFixedCourseToSchedule(Schedule schedule, List<Course> courentCourseList, Teacher[] courentTeachers)
+    #region Optimizer
+    public Schedule Optimizer(Schedule schedule)
     {
-        foreach (var fixedCtt in FixedCourses)
+        var newSchedule = DeepCopy(schedule);
+        newSchedule = OptimizerOfPenaltyOfTeacher(newSchedule);
+        if (newSchedule.Penalty.TotalPenalty < schedule.Penalty.TotalPenalty)
         {
-            schedule.CourseTeacherClassTimes.Add(new()
-            {
-                Course = fixedCtt.Course,
-                ClassTimes = fixedCtt.ClassTimes,
-                Teacher = fixedCtt.Teacher,
-            });
-
-            courentCourseList.Remove(fixedCtt.Course);
-
-            foreach (var classTime in fixedCtt.ClassTimes)
-            {
-                var teacher = courentTeachers.First(t => t.ID == fixedCtt.Teacher.ID);
-                teacher.PreferredTimes.Remove(teacher.PreferredTimes.First(t => t.PreferredTime == classTime.ClassTime));
-            }
-
+            return newSchedule;
         }
         return schedule;
     }
+    public Schedule OptimizerOfPenaltyOfTeacher(Schedule schedule)
+    {
+        var newSchedule = DeepCopy(schedule);
 
+        var penaltyOfTechers = PenaltyOfTeachers(schedule).OrderByDescending(p => p.Value).ToList();
+        foreach (var penaltyAndTecher in penaltyOfTechers)
+        {
+            var teacher = Teachers.First(t => t.ID == penaltyAndTecher.Key.ID);
+
+            var timeOfTeacherInSchedule = schedule.CourseTeacherClassTimes
+            .Where(cct => cct.Teacher.ID == teacher.ID)
+            .SelectMany(cct => cct.ClassTimes)
+            .Select(evenOddClassTime => evenOddClassTime.ClassTime).ToList();
+
+            var teacherTime = teacher.PreferredTimes.Select(t => t.PreferredTime);
+            var emptyTimes = teacherTime.Except(timeOfTeacherInSchedule).ToList();
+
+            if (emptyTimes.Count() > 0)
+            {
+                var rnd = new Random();
+                var newTime = emptyTimes[rnd.Next(emptyTimes.Count())];
+                var oldTime = timeOfTeacherInSchedule[rnd.Next(timeOfTeacherInSchedule.Count())];
+
+                var courseTeacherClassTimesToUpdate = newSchedule.CourseTeacherClassTimes
+                    .First(cct => cct.Teacher.ID == teacher.ID && cct.ClassTimes.Any(ct => ct.ClassTime == oldTime));
+
+                foreach (var ct in courseTeacherClassTimesToUpdate.ClassTimes.Where(ct => ct.ClassTime == oldTime))
+                {
+                    ct.ClassTime = newTime;
+                }
+            }
+        }
+        if (AreRequirementsMet(newSchedule))
+        {
+            if (newSchedule.Penalty.TotalPenalty < schedule.Penalty.TotalPenalty)
+            {
+                return newSchedule;
+            }
+        }
+        return schedule;
+
+    }
+    //public Schedule OptimizerOfPenaltyOfMaximumCountOfClassInSection(Schedule schedule)
+    //{
+
+    //}
+    //public Schedule OptimizerOfPenaltyOfOverlay(Schedule schedule)
+    //{
+
+    //}
+    #endregion
+    #region Requirements of schedule 
+    public bool AreRequirementsMet(Schedule schedule)
+    {
+        var areRequirementsMet = true;
+        if (!IsMaxDayCountOfTeacherExceeded(schedule))
+        {
+            areRequirementsMet = false;
+        }
+        if (!AreCorequisiteNonConcurrent(schedule))
+        {
+            areRequirementsMet = false;
+        }
+        return areRequirementsMet;
+    }
     private bool IsMaxDayCountOfTeacherExceeded(Schedule schedule)
     {
         var isHealthy = true;
@@ -455,7 +582,70 @@ public class GeneticAlgorithm
         }
         return isHealthy;
     }
-    private Course SelectCourse(List<Course> courentCourseList,List<Course> selectedCourses)
+    public bool AreCorequisiteNonConcurrent(Schedule schedule)
+    {
+        var areCorequisiteNonConcurrent = true;
+        foreach (var ctt in schedule.CourseTeacherClassTimes)
+        {
+            if (!AreCorequisiteNonConcurrent(schedule, ctt))
+            {
+                areCorequisiteNonConcurrent = false;
+            }
+        }
+        return areCorequisiteNonConcurrent;
+    }
+    public bool AreCorequisiteNonConcurrent(Schedule schedule, CourseTeacherClassTime ctt)
+    {
+        var areCorequisiteNonConcurrent = true;
+
+        var corequisites = ctt.Course.CorequisiteCourses;
+        foreach (var corequisite in corequisites)
+        {
+            var corequisitesInSchedule = schedule.CourseTeacherClassTimes.First(s => s.Course.ID == corequisite.CorequisiteCourseId);
+            foreach (var corequisitesTime in corequisitesInSchedule.ClassTimes)
+            {
+                foreach (var courseTime in ctt.ClassTimes)
+                {
+                    if (corequisitesTime.ClassTime == courseTime.ClassTime)
+                    {
+                        if (corequisitesTime.EvenOdd == courseTime.EvenOdd || corequisitesTime.EvenOdd == EvenOdd.everyWeek || courseTime.EvenOdd == EvenOdd.everyWeek)
+                        {
+                            areCorequisiteNonConcurrent = false;
+                        }
+                    }
+                }
+            }
+        }
+
+        return areCorequisiteNonConcurrent;
+    }
+    #endregion
+
+    private Schedule AddFixedCourseToSchedule(Schedule schedule, List<Course> courentCourseList, Teacher[] courentTeachers)
+    {
+        foreach (var fixedCtt in FixedCourses)
+        {
+            schedule.CourseTeacherClassTimes.Add(new()
+            {
+                Course = fixedCtt.Course,
+                ClassTimes = fixedCtt.ClassTimes,
+                Teacher = fixedCtt.Teacher,
+            });
+
+            courentCourseList.Remove(fixedCtt.Course);
+
+            foreach (var classTime in fixedCtt.ClassTimes)
+            {
+                var teacher = courentTeachers.First(t => t.ID == fixedCtt.Teacher.ID);
+                teacher.PreferredTimes.Remove(teacher.PreferredTimes.First(t => t.PreferredTime == classTime.ClassTime));
+            }
+
+        }
+        return schedule;
+    }
+
+
+    private Course SelectCourse(List<Course> courentCourseList, List<Course> selectedCourses)
     {
         var rnd = new Random();
         while (true)
@@ -465,7 +655,7 @@ public class GeneticAlgorithm
             if (!selectedCourses.Any(c => c == course))
             {
                 courentCourseList.Remove(course);
-                return course; 
+                return course;
             }
         }
 
