@@ -1,6 +1,7 @@
 ﻿using ClosedXML.Excel;
 using Course_Scheduler.Data;
 using Course_Scheduler.Models;
+using Course_Scheduler.Models.Enum;
 using Course_Scheduler.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -46,19 +47,93 @@ namespace Course_Scheduler.Controllers
                 .Where(fc => fc.SemesterId == semesterId)
                 .ToList();
             var coursePrerequisites = _context.CoursePrerequisites.ToList();
-            
+            var corequisiteCourse = _context.CorequisitesCourses.ToList();
             var schedules = new List<Schedule>();
 
             GeneticAlgorithm ga = new GeneticAlgorithm(courses, courseToTeachers, coursePenaltys,
-                teachers, fixedCourses, coursePrerequisites);
+                teachers, fixedCourses, coursePrerequisites,
+                corequisiteCourse);
             
             schedules.AddRange(await ga.CreateSchedules(Count,UnhealtyCount));
             
             schedules = schedules.OrderBy(s => s.Penalty.TotalPenalty).ToList();
 
 
-           
 
+
+
+            //using (var workbook = new XLWorkbook())
+            //{
+            //    // Add a worksheet to the workbook
+            //    var worksheet = workbook.Worksheets.Add("My Worksheet2");
+
+            //    // Set headers
+                
+
+            //    // Populate data
+            //    var cell = 0;
+            //    int row = 0;
+            //    int id = 0;
+            //    foreach (var schedule in schedules)
+            //    {
+            //        worksheet.Cell(row, cell + 1).Value = "T1";
+            //        worksheet.Cell(row, cell + 2).Value = "T2";
+            //        worksheet.Cell(row, cell + 3).Value = "T3";
+            //        worksheet.Cell(row, cell + 4).Value = "T4";
+            //        worksheet.Cell(row, cell + 5).Value = "T5";
+
+            //        worksheet.Cell(row+1, cell).Value = "sa";
+            //        worksheet.Cell(row+2, cell).Value = "su";
+            //        worksheet.Cell(row+3, cell).Value = "m";
+            //        worksheet.Cell(row+4, cell).Value = "t";
+            //        worksheet.Cell(row+5, cell).Value = "w";
+                    
+            //        foreach (var CTT in schedule.CourseTeacherClassTimes)
+            //        {
+            //            foreach (var time in CTT.ClassTimes)
+            //            {
+            //                switch (time.ClassTime.ToString().Substring(0, time.ClassTime.ToString().IndexOf('T')))
+            //                {
+            //                    case "Saturday":
+            //                        // کد مربوط به روز شنبه
+            //                        switch (time.ClassTime.ToString().Substring(time.ClassTime.ToString().IndexOf('T')), time.ClassTime.ToString().Length) 
+            //                        {
+            //                            //case "":
+            //                              //  break;
+            //                        }
+                                    
+            //                        //worksheet.Cell(row+1,);
+            //                        break;
+            //                    case "Sunday":
+            //                        // کد مربوط به روز یکشنبه
+            //                        break;
+            //                    case "Monday":
+            //                        // کد مربوط به روز دوشنبه
+            //                        break;
+            //                    case "Tuesday":
+            //                        // کد مربوط به روز سه شنبه
+            //                        break;
+            //                    case "Wednesday":
+            //                        // کد مربوط به روز چهارشنبه
+            //                        break;
+            //                    case "Thursday":
+            //                        // کد مربوط به روز پنجشنبه
+            //                        break;
+            //                    case "Friday":
+            //                        // کد مربوط به روز جمعه
+            //                        break;
+            //                    default:
+            //                        // کد مربوط به زمانی که روز مشخص نیست
+            //                        break;
+            //                }
+            //            }
+            //        }
+            //        row++;
+            //    }
+
+            //    // Save the workbook
+            //    workbook.SaveAs("TimeTable.xlsx");
+            //}
 
 
             // Create a new Excel workbook

@@ -15,9 +15,11 @@ public class GeneticAlgorithm
     public List<Teacher> Teachers { get; set; }
     public List<CourseTeacherClassTime> FixedCourses { get; set; }
     public List<CoursePrerequisites> CoursePrerequisites { get; set; }
+    public List<CorequisiteCourse> CorequisiteCourses { get; set; }
 
     public GeneticAlgorithm(List<Course> courses, List<CourseToTeacher> courseToTeacher, List<CoursePenalty> coursePenalties,
-        List<Teacher> teachers, List<CourseTeacherClassTime> fixedCourses, List<CoursePrerequisites> coursePrerequisites)
+        List<Teacher> teachers, List<CourseTeacherClassTime> fixedCourses,
+        List<CoursePrerequisites> coursePrerequisites, List<CorequisiteCourse> corequisiteCourses)
     {
         Courses = courses;
         FixedCourses = fixedCourses;
@@ -32,6 +34,7 @@ public class GeneticAlgorithm
                 time.EvenOdd = EvenOdd.everyWeek;
             }
         }
+        CorequisiteCourses = corequisiteCourses;
     }
     #endregion
 
@@ -244,29 +247,30 @@ public class GeneticAlgorithm
         };
         string json = JsonConvert.SerializeObject(schedule, jsonSettings);
         return JsonConvert.DeserializeObject<Schedule>(json);
+        //return schedule.DeepCopy();
     }
     public async Task<List<Schedule>> CreateSchedules(int count = 100, int unhealthyCount = 1000)
     {
         var allSchedules = new ConcurrentBag<Schedule>();
 
-        //var tasks = Enumerable.Range(0, 10).Select(async _ =>
-        //{
-        //    var schedules = GeneratePopulation(count, unhealthyCount).Take(10);
-        //    foreach (var schedule in schedules)
-        //    {
-        //        var optimizedSchedule = await Task.Run(() => Optimizer(schedule));
-        //        allSchedules.Add(optimizedSchedule);
-        //        //allSchedules.Add(schedule);
-        //    }
-        //});
-
-        //await Task.WhenAll(tasks);
-        var scs=GeneratePopulation(count, unhealthyCount).Take(10);
-        foreach (var item in scs)
+        var tasks = Enumerable.Range(0, 10).Select(async _ =>
         {
-            var _ = Optimizer(item);
-            allSchedules.Add(_);
-        }
+            var schedules = GeneratePopulation(count, unhealthyCount).Take(10);
+            foreach (var schedule in schedules)
+            {
+                //var optimizedSchedule = await Task.Run(() => Optimizer(schedule));
+                //allSchedules.Add(optimizedSchedule);
+                allSchedules.Add(schedule);
+            }
+        });
+
+        await Task.WhenAll(tasks);
+        //var scs=GeneratePopulation(count, unhealthyCount).Take(10);
+        //foreach (var item in scs)
+        //{
+        //    var _ = Optimizer(item);
+        //    allSchedules.Add(_);
+        //}
         return allSchedules.Distinct().ToList();
     }
 
@@ -494,45 +498,64 @@ public class GeneticAlgorithm
     public Schedule OptimizerOfPenaltyOfTeacher(Schedule schedule)
     {
         var newSchedule = DeepCopy(schedule);
-
+        foreach (var ctt in newSchedule.CourseTeacherClassTimes)
+        {
+            var corequisiteCourses = CorequisiteCourses.Where(c => c.CourseId == ctt.Course.ID).ToList();
+            ctt.Course.CorequisiteCourses = corequisiteCourses;
+            var req = CoursePrerequisites.Where(c => c.CourseId == ctt.Course.ID).ToList();
+            ctt.Course.Prerequisites = req;
+        }
         var penaltyOfTechers = PenaltyOfTeachers(schedule).OrderByDescending(p => p.Value).ToList();
         foreach (var penaltyAndTecher in penaltyOfTechers)
         {
-            var teacher = Teachers.First(t => t.ID == penaltyAndTecher.Key.ID);
+            var teacher = Teachers.FirstOrDefault(t => t.ID == penaltyAndTecher.Key.ID);
+            if (teacher == null)
+            {
+                throw new InvalidOperationException($"Teacher with ID {penaltyAndTecher.Key.ID} not found.");
+            }
 
             var timeOfTeacherInSchedule = schedule.CourseTeacherClassTimes
-            .Where(cct => cct.Teacher.ID == teacher.ID)
-            .SelectMany(cct => cct.ClassTimes)
-            .Select(evenOddClassTime => evenOddClassTime.ClassTime).ToList();
+                .Where(cct => cct.Teacher.ID == teacher.ID)
+                .SelectMany(cct => cct.ClassTimes)
+                .Select(evenOddClassTime => evenOddClassTime.ClassTime).Distinct().ToList();
 
-            var teacherTime = teacher.PreferredTimes.Select(t => t.PreferredTime);
+            var teacherTime = teacher.PreferredTimes.OrderBy(t => t.Penalty).Select(t => t.PreferredTime).ToList();
             var emptyTimes = teacherTime.Except(timeOfTeacherInSchedule).ToList();
 
-            if (emptyTimes.Count() > 0)
+            if (emptyTimes.Count > 0)
             {
                 var rnd = new Random();
-                var newTime = emptyTimes[rnd.Next(emptyTimes.Count())];
-                var oldTime = timeOfTeacherInSchedule[rnd.Next(timeOfTeacherInSchedule.Count())];
+                var newTime = emptyTimes[rnd.Next(emptyTimes.Count)];
+                var oldTime = timeOfTeacherInSchedule[rnd.Next(timeOfTeacherInSchedule.Count)];
 
                 var courseTeacherClassTimesToUpdate = newSchedule.CourseTeacherClassTimes
-                    .First(cct => cct.Teacher.ID == teacher.ID && cct.ClassTimes.Any(ct => ct.ClassTime == oldTime));
+                    .Where(cct => cct.Teacher.ID == teacher.ID)
+                    .FirstOrDefault(cct => cct.ClassTimes.Any(ct => ct.ClassTime == oldTime));
 
-                foreach (var ct in courseTeacherClassTimesToUpdate.ClassTimes.Where(ct => ct.ClassTime == oldTime))
+                if (courseTeacherClassTimesToUpdate != null)
                 {
-                    ct.ClassTime = newTime;
+                    var classTimeToUpdate = courseTeacherClassTimesToUpdate.ClassTimes
+                        .Where(ct => ct.ClassTime == oldTime).ToList();
+
+                    if (classTimeToUpdate.Count > 0)
+                    {
+                        classTimeToUpdate[rnd.Next(classTimeToUpdate.Count)].ClassTime = newTime;
+                    }
                 }
             }
         }
+
         if (AreRequirementsMet(newSchedule))
         {
+            newSchedule.Penalty = CalculatePenalty(newSchedule);
             if (newSchedule.Penalty.TotalPenalty < schedule.Penalty.TotalPenalty)
             {
                 return newSchedule;
             }
         }
         return schedule;
-
     }
+
     //public Schedule OptimizerOfPenaltyOfMaximumCountOfClassInSection(Schedule schedule)
     //{
 
@@ -601,16 +624,19 @@ public class GeneticAlgorithm
         var corequisites = ctt.Course.CorequisiteCourses;
         foreach (var corequisite in corequisites)
         {
-            var corequisitesInSchedule = schedule.CourseTeacherClassTimes.First(s => s.Course.ID == corequisite.CorequisiteCourseId);
-            foreach (var corequisitesTime in corequisitesInSchedule.ClassTimes)
+            var corequisitesInSchedule = schedule.CourseTeacherClassTimes.FirstOrDefault(s => s.Course.ID == corequisite.CorequisiteCourseId);
+            if (corequisitesInSchedule != null)
             {
-                foreach (var courseTime in ctt.ClassTimes)
+                foreach (var corequisitesTime in corequisitesInSchedule.ClassTimes)
                 {
-                    if (corequisitesTime.ClassTime == courseTime.ClassTime)
+                    foreach (var courseTime in ctt.ClassTimes)
                     {
-                        if (corequisitesTime.EvenOdd == courseTime.EvenOdd || corequisitesTime.EvenOdd == EvenOdd.everyWeek || courseTime.EvenOdd == EvenOdd.everyWeek)
+                        if (corequisitesTime.ClassTime == courseTime.ClassTime)
                         {
-                            areCorequisiteNonConcurrent = false;
+                            if (corequisitesTime.EvenOdd == courseTime.EvenOdd || corequisitesTime.EvenOdd == EvenOdd.everyWeek || courseTime.EvenOdd == EvenOdd.everyWeek)
+                            {
+                                areCorequisiteNonConcurrent = false;
+                            }
                         }
                     }
                 }

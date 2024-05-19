@@ -14,6 +14,19 @@ public class Teacher : Base
     public List<TeacherClassTimeWithPenalties> PreferredTimes{ get; set; }
     public int MaximumDayCount { get; set; }
     public int PenaltyForEmptyTime { get; set; } = 1;
+
+    public Teacher DeepCopy()
+    {
+        return new Teacher
+        {
+            Name = this.Name,
+            TeacherCode = this.TeacherCode,
+            MaximumDayCount = this.MaximumDayCount,
+            PenaltyForEmptyTime = this.PenaltyForEmptyTime,
+            PreferredTimes = this.PreferredTimes.Select(pt => pt.DeepCopy()).ToList()
+        };
+    }
+
 }
 public class TeacherClassTimeWithPenalties : Base
 {
@@ -22,4 +35,18 @@ public class TeacherClassTimeWithPenalties : Base
     public EvenOdd? EvenOdd { get; set; }
     public int TeacherId { get; set; }
     public Teacher Teacher { get; set; }
+
+
+    public TeacherClassTimeWithPenalties DeepCopy()
+    {
+        return new TeacherClassTimeWithPenalties
+        {
+            PreferredTime = this.PreferredTime,
+            Penalty = this.Penalty,
+            EvenOdd = this.EvenOdd,
+            TeacherId = this.TeacherId,
+            Teacher = this.Teacher?.DeepCopy()
+        };
+    }
+
 }
