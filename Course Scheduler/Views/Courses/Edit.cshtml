@@ -4,7 +4,7 @@
     ViewData["Title"] = "Edit";
 
     var teacherNames = Json.Serialize(((List<Teacher>)ViewBag.Teachers).Select(t => t.Name));
-    var teachercodes = Json.Serialize(((List<Teacher>)ViewBag.Teachers).Select(t => t.TeacherCode));
+    var teacherCodes = Json.Serialize(((List<Teacher>)ViewBag.Teachers).Select(t => t.TeacherCode));
     var teacherIds = Json.Serialize(((List<Teacher>)ViewBag.Teachers).Select(t => t.ID));
     var json = Json.Serialize(((List<Course>)ViewData["RequiredCourse"]).Select(c => c.Name));
     var reqIdjson = Json.Serialize(((List<Course>)ViewData["RequiredCourse"]).Select(c => c.ID));
@@ -44,7 +44,8 @@
             <div class="form-group">
                 <label asp-for="Course.Groups" class="control-label"></label>
                 <div class="input-group mb-3">
-                    <input type="text" id="newGroup" class="form-control" placeholder="Enter item here">
+                    <input type="text" id="newGroup" class="form-control" list="groupList" placeholder="Enter item here">
+                    <datalist id="groupList"></datalist>
                     <button onclick="addGroup()" type="button" class="btn btn-primary">Add Item</button>
                 </div>
                 <ul id="GroupList" class="list-group">
@@ -62,7 +63,8 @@
             <div class="form-group">
                 <label asp-for="Course.Prerequisites" class="control-label"></label>
                 <div class="input-group mb-3">
-                    <input type="text" id="newItem" class="form-control" placeholder="Enter item here">
+                    <input type="text" id="newItem" class="form-control" list="courseList" placeholder="Enter item here">
+                    <datalist id="courseList"></datalist>
                     <button onclick="addItem()" type="button" class="btn btn-primary">Add Item</button>
                 </div>
                 <ul id="itemList" class="list-group">
@@ -81,7 +83,8 @@
             <div class="form-group">
                 <label asp-for="Course.CorequisiteCourses" class="control-label"></label>
                 <div class="input-group mb-3">
-                    <input type="text" id="newCorequisiteCoursesItem" class="form-control" placeholder="Enter item here">
+                    <input type="text" id="newCorequisiteCoursesItem" class="form-control" list="corequisiteCourseList" placeholder="Enter item here">
+                    <datalist id="corequisiteCourseList"></datalist>
                     <button onclick="addCorequisiteCoursesItem()" type="button" class="btn btn-primary">Add Item</button>
                 </div>
                 <ul id="CorequisiteCoursesItemList" class="list-group">
@@ -101,7 +104,8 @@
             <div class="form-group">
                 <label asp-for="TeachersId" class="control-label"></label>
                 <div class="input-group mb-3">
-                    <input type="text" id="newTeacher" class="form-control" placeholder="Enter item here">
+                    <input type="text" id="newTeacher" class="form-control" list="teacherList" placeholder="Enter item here">
+                    <datalist id="teacherList"></datalist>
                     <button onclick="addTeacher()" type="button" class="btn btn-primary">Add Item</button>
                 </div>
                 <ul id="TeacherList" class="list-group">
@@ -134,259 +138,210 @@
     <script>
         var requiredCourses = @json;
         var requiredCourseIds = @reqIdjson;
-        var requiredCoursecodes = @reqCodeJson;
+        var requiredCourseCodes = @reqCodeJson;
         var groupNames = @groupNames;
         var groupIds = @groupIds;
-        var teacherNaems = @teacherNames;
-        var teacherCodes = @teachercodes;
+        var teacherNames = @teacherNames;
+        var teacherCodes = @teacherCodes;
         var teacherIds = @teacherIds;
-        console.log(teacherNames);
-        console.log(teachercodes);
 
-        function submitFrom() {
-            var from = document.getElementById("addCoursefrom");
+        document.addEventListener('DOMContentLoaded', function () {
+            populateDatalist('groupList', groupNames);
+            populateDatalist('courseList', requiredCourses);
+            populateDatalist('corequisiteCourseList', requiredCourses);
+            populateDatalist('teacherList', teacherNames.concat(teacherCodes));
+        });
+
+        function populateDatalist(datalistId, items) {
+            var datalist = document.getElementById(datalistId);
+            items.forEach(function (item) {
+                var option = document.createElement('option');
+                option.value = item;
+                datalist.appendChild(option);
+            });
+        }
+
+        function submitForm() {
+            var form = document.getElementById("addCourseForm");
             EditNameOfRequiredCourses();
-            EditNameOfCorequisitesCourse();
+            EditNameOfCorequisiteCourses();
             EditNameOfGroups();
             EditNameOfTeachers();
-            from.submit();
-        }
-
-        function EditNameOfGroups() {
-            var inputs = document.querySelectorAll('input[class="Group"]');
-            console.log(inputs);
-
-            inputs.forEach(function (item, index) {
-                item.name = `GroupIds[${index}]`
-            });
-        }
-        function EditNameOfRequiredCourses() {
-            var inputs = document.querySelectorAll('input[class="requiredCourses"]');
-            console.log(inputs);
-
-            inputs.forEach(function (item, index) {
-                item.name = `PrerequisitesId[${index}]`
-            });
-        }
-        function EditNameOfCorequisitesCourse() {
-            var inputs = document.querySelectorAll('input[class="CorequisiteCourses"]');
-            console.log(inputs);
-
-            inputs.forEach(function (item, index) {
-                item.name = `CorequisitesId[${index}]`
-            });
+            form.submit();
         }
 
         function EditNameOfTeachers() {
             var inputs = document.querySelectorAll('input[class="teachers"]');
-            console.log(inputs);
-
             inputs.forEach(function (item, index) {
-                item.name = `TeachersId[${index}]`
+                item.name = `TeachersId[${index}]`;
+            });
+        }
+
+        function EditNameOfRequiredCourses() {
+            var inputs = document.querySelectorAll('input[class="requiredCourses"]');
+            inputs.forEach(function (item, index) {
+                item.name = `PrerequisitesId[${index}]`;
+            });
+        }
+
+        function EditNameOfCorequisiteCourses() {
+            var inputs = document.querySelectorAll('input[class="CorequisiteCourses"]');
+            inputs.forEach(function (item, index) {
+                item.name = `CorequisitesId[${index}]`;
+            });
+        }
+
+        function EditNameOfGroups() {
+            var inputs = document.querySelectorAll('input[class="Group"]');
+            inputs.forEach(function (item, index) {
+                item.name = `GroupIds[${index}]`;
             });
         }
 
         function addTeacher() {
-            // Get the text from the input field
             var newItemText = document.getElementById("newTeacher").value;
-            var indexOfNewItemText = teacherNaems.indexOf(newItemText);
+            var indexOfNewItemText = teacherNames.indexOf(newItemText);
             var indexOfNewItemCode = teacherCodes.indexOf(newItemText);
-            console.log(!newItemText)
-            console.log(indexOfNewItemText === -1)
-            console.log(indexOfNewItemCode === -1)
 
-            if (!newItemText || (indexOfNewItemText === -1 && indexOfNewItemCode === -1)) return; // Prevent empty items
+            if (!newItemText || (indexOfNewItemText === -1 && indexOfNewItemCode === -1)) return;
 
-            // Create a new list item element
             var newListItem = document.createElement("li");
             newListItem.classList.add("list-group-item", "d-flex", "justify-content-between", "align-items-center");
-            if (indexOfNewItemCode === -1) {
-                newListItem.textContent = newItemText;
-            } else {
-                newListItem.textContent = teacherNaems[indexOfNewItemCode];
-            }
-            var newIput = document.createElement("input");
-            if (indexOfNewItemCode === -1) {
-                newIput.value = teacherIds[indexOfNewItemText];
-            } else {
-                newIput.value = teacherIds[indexOfNewItemCode];
-            }
+            newListItem.textContent = indexOfNewItemCode === -1 ? newItemText : teacherNames[indexOfNewItemCode];
 
-            newIput.type = "hidden";
-            newIput.classList.add("teachers");
-            newListItem.appendChild(newIput);
+            var newInput = document.createElement("input");
+            newInput.value = indexOfNewItemCode === -1 ? teacherIds[indexOfNewItemText] : teacherIds[indexOfNewItemCode];
+            newInput.type = "hidden";
+            newInput.classList.add("teachers");
+            newListItem.appendChild(newInput);
 
-            // Add a remove button to each list item
             var removeButton = document.createElement("button");
             removeButton.classList.add("btn", "btn-sm", "btn-outline-danger");
             removeButton.textContent = "Remove";
             removeButton.onclick = function () {
                 this.parentNode.remove();
-            }
+            };
             newListItem.appendChild(removeButton);
 
-            // Add the new list item to the existing list
-            var itemList = document.getElementById("TeacherList");
-            itemList.appendChild(newListItem);
-
-            // Clear the input field for the next item
+            document.getElementById("TeacherList").appendChild(newListItem);
             document.getElementById("newTeacher").value = "";
             event.preventDefault();
         }
 
-
         function addGroup() {
-            // Get the text from the input field
             var newItemText = document.getElementById("newGroup").value;
             var indexOfNewItemText = groupNames.indexOf(newItemText);
             var indexOfNewItemCode = groupIds.indexOf(newItemText);
-            console.log(newItemText)
-            console.log("-------")
-            groupIds.forEach(function (item, index) {
-                if(newItemText == item){
-                    indexOfNewItemCode = index;
-                }
-            });
-            console.log("-------")
-            console.log(indexOfNewItemText === -1)
-            console.log(indexOfNewItemCode === -1)
-            if (!newItemText || (indexOfNewItemText === -1 && indexOfNewItemCode === -1)) return; // Prevent empty items
 
-            // Create a new list item element
+            if (!newItemText || (indexOfNewItemText === -1 && indexOfNewItemCode === -1)) return;
+
             var newListItem = document.createElement("li");
             newListItem.classList.add("list-group-item", "d-flex", "justify-content-between", "align-items-center");
-            if (indexOfNewItemCode === -1) {
-                newListItem.textContent = newItemText;
-            } else {
-                newListItem.textContent = groupNames[indexOfNewItemCode];;
-            }
-            var newIput = document.createElement("input");
-            if (indexOfNewItemCode === -1) {
-                newIput.value = groupIds[indexOfNewItemText];
-            } else {
-                newIput.value = groupIds[indexOfNewItemCode];
-            }
+            newListItem.textContent = indexOfNewItemCode === -1 ? newItemText : groupNames[indexOfNewItemCode];
 
-            newIput.type = "hidden";
-            newIput.classList.add("Group");
-            newListItem.appendChild(newIput);
+            var newInput = document.createElement("input");
+            newInput.value = indexOfNewItemCode === -1 ? groupIds[indexOfNewItemText] : groupIds[indexOfNewItemCode];
+            newInput.type = "hidden";
+            newInput.classList.add("Group");
+            newListItem.appendChild(newInput);
 
-            // Add a remove button to each list item
             var removeButton = document.createElement("button");
             removeButton.classList.add("btn", "btn-sm", "btn-outline-danger");
             removeButton.textContent = "Remove";
             removeButton.onclick = function () {
                 this.parentNode.remove();
-            }
+            };
             newListItem.appendChild(removeButton);
 
-            // Add the new list item to the existing list
-            var itemList = document.getElementById("GroupList");
-            itemList.appendChild(newListItem);
-
-            // Clear the input field for the next item
+            document.getElementById("GroupList").appendChild(newListItem);
             document.getElementById("newGroup").value = "";
             event.preventDefault();
         }
 
-        function addCorequisiteCoursesItem()
-        {
-            // Get the text from the input field
+        function addCorequisiteCoursesItem() {
             var newItemText = document.getElementById("newCorequisiteCoursesItem").value;
             var indexOfNewItemText = requiredCourses.indexOf(newItemText);
-            var indexOfNewItemCode = requiredCoursecodes.indexOf(newItemText);
-            console.log(!newItemText)
-            console.log(indexOfNewItemText === -1)
-            console.log(indexOfNewItemCode === -1)
-            if (!newItemText || (indexOfNewItemText === -1 && indexOfNewItemCode === -1)) return; // Prevent empty items
+            var indexOfNewItemCode = requiredCourseCodes.indexOf(newItemText);
 
-            // Create a new list item element
+            if (!newItemText || (indexOfNewItemText === -1 && indexOfNewItemCode === -1)) return;
+
             var newListItem = document.createElement("li");
             newListItem.classList.add("list-group-item", "d-flex", "justify-content-between", "align-items-center");
-            if (indexOfNewItemCode === -1) {
-                newListItem.textContent = newItemText;
-            }else{
-                newListItem.textContent = requiredCourses[indexOfNewItemCode];;
-            }
-            var newIput = document.createElement("input");
-            if (indexOfNewItemCode === -1) {
-                newIput.value = requiredCourseIds[indexOfNewItemText];
-            } else {
-                newIput.value = requiredCourseIds[indexOfNewItemCode];
-            }
-            
-            newIput.type = "hidden";
-            newIput.classList.add("CorequisiteCourses");
-            newListItem.appendChild(newIput);
+            newListItem.textContent = indexOfNewItemCode === -1 ? newItemText : requiredCourses[indexOfNewItemCode];
 
-            // Add a remove button to each list item
+            var newInput = document.createElement("input");
+            newInput.value = indexOfNewItemCode === -1 ? requiredCourseIds[indexOfNewItemText] : requiredCourseIds[indexOfNewItemCode];
+            newInput.type = "hidden";
+            newInput.classList.add("CorequisiteCourses");
+            newListItem.appendChild(newInput);
+
             var removeButton = document.createElement("button");
             removeButton.classList.add("btn", "btn-sm", "btn-outline-danger");
             removeButton.textContent = "Remove";
             removeButton.onclick = function () {
                 this.parentNode.remove();
-            }
+            };
             newListItem.appendChild(removeButton);
 
-            // Add the new list item to the existing list
-            var itemList = document.getElementById("CorequisiteCoursesItemList");
-            itemList.appendChild(newListItem);
-
-            // Clear the input field for the next item
+            document.getElementById("CorequisiteCoursesItemList").appendChild(newListItem);
             document.getElementById("newCorequisiteCoursesItem").value = "";
             event.preventDefault();
         }
+
         function addItem() {
-            console.log("test");
-            // Get the text from the input field
             var newItemText = document.getElementById("newItem").value;
             var indexOfNewItemText = requiredCourses.indexOf(newItemText);
-            var indexOfNewItemCode = requiredCoursecodes.indexOf(newItemText);
-            console.log(!newItemText)
-            console.log(indexOfNewItemText === -1)
-            console.log(indexOfNewItemCode === -1)
-            if (!newItemText || (indexOfNewItemText === -1 && indexOfNewItemCode === -1)) return; // Prevent empty items
+            var indexOfNewItemCode = requiredCourseCodes.indexOf(newItemText);
 
-            // Create a new list item element
+            if (!newItemText || (indexOfNewItemText === -1 && indexOfNewItemCode === -1)) return;
+
             var newListItem = document.createElement("li");
             newListItem.classList.add("list-group-item", "d-flex", "justify-content-between", "align-items-center");
-            if (indexOfNewItemCode === -1) {
-                newListItem.textContent = newItemText;
-            } else {
-                newListItem.textContent = requiredCourses[indexOfNewItemCode];;
-            }
-            var newIput = document.createElement("input");
-            if (indexOfNewItemCode === -1) {
-                newIput.value = requiredCourseIds[indexOfNewItemText];
-            } else {
-                newIput.value = requiredCourseIds[indexOfNewItemCode];
-            } 
-            newIput.type = "hidden";
-            newIput.classList.add("requiredCourses");
-            newListItem.appendChild(newIput);
+            newListItem.textContent = indexOfNewItemCode === -1 ? newItemText : requiredCourses[indexOfNewItemCode];
 
-            // Add a remove button to each list item
+            var newInput = document.createElement("input");
+            newInput.value = indexOfNewItemCode === -1 ? requiredCourseIds[indexOfNewItemText] : requiredCourseIds[indexOfNewItemCode];
+            newInput.type = "hidden";
+            newInput.classList.add("requiredCourses");
+            newListItem.appendChild(newInput);
+
             var removeButton = document.createElement("button");
             removeButton.classList.add("btn", "btn-sm", "btn-outline-danger");
             removeButton.textContent = "Remove";
-            removeButton.type = "button";
             removeButton.onclick = function () {
                 this.parentNode.remove();
-            }
+            };
             newListItem.appendChild(removeButton);
 
-            // Add the new list item to the existing list
-            var itemList = document.getElementById("itemList");
-            itemList.appendChild(newListItem);
-
-            // Clear the input field for the next item
+            document.getElementById("itemList").appendChild(newListItem);
             document.getElementById("newItem").value = "";
             event.preventDefault();
         }
-        function RemoveItem(button) {
-            console.log(button.parentNode)
-            button.parentNode.remove();
-        }
+
+        document.getElementById("newTeacher").addEventListener("keypress", function (event) {
+            if (event.key === "Enter") {
+                event.preventDefault();
+                addTeacher();
+            }
+        });
+        document.getElementById("newCorequisiteCoursesItem").addEventListener("keypress", function (event) {
+            if (event.key === "Enter") {
+                event.preventDefault();
+                addCorequisiteCoursesItem();
+            }
+        });
+        document.getElementById("newItem").addEventListener("keypress", function (event) {
+            if (event.key === "Enter") {
+                event.preventDefault();
+                addItem();
+            }
+        });
+        document.getElementById("newGroup").addEventListener("keypress", function (event) {
+            if (event.key === "Enter") {
+                event.preventDefault();
+                addGroup();
+            }
+        });
     </script>
 
     @{

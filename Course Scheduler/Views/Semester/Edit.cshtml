@@ -27,7 +27,8 @@
             <div class="form-group">
                 <label asp-for="CoursesId" class="control-label"></label>
                 <div class="input-group mb-3">
-                    <input type="text" id="newItem" class="form-control" placeholder="Enter item here">
+                    <input type="text" id="newItem" class="form-control" placeholder="Enter item here" list="courseList">
+                    <datalist id="courseList"></datalist>
                     <button onclick="addItem()" type="button" class="btn btn-primary">Add Item</button>
                 </div>
                 <ul id="itemList" class="list-group"></ul>
@@ -78,14 +79,11 @@
 
 
         function addItem() {
-            console.log("test");
-            // Get the text from the input field
             var newItemText = document.getElementById("newItem").value;
             var indexOfNewItemText = Courses.indexOf(newItemText);
             var indexOfNewItemCode = courseCode.indexOf(newItemText);
-            if (!newItemText || (indexOfNewItemText === -1 && indexOfNewItemCode == -1)) return; // Prevent empty items
+            if (!newItemText || (indexOfNewItemText === -1 && indexOfNewItemCode === -1)) return; // Prevent empty items
 
-            // Create a new list item element
             var newListItem = document.createElement("li");
             newListItem.classList.add("list-group-item", "d-flex", "justify-content-between", "align-items-center");
             if (indexOfNewItemCode == -1) {
@@ -93,33 +91,44 @@
             } else {
                 newListItem.textContent = Courses[indexOfNewItemCode];
             }
-            var newIput = document.createElement("input");
+            var newInput = document.createElement("input");
             if (indexOfNewItemCode == -1) {
-                newIput.value = requiredCourseIds[indexOfNewItemText];
+                newInput.value = requiredCourseIds[indexOfNewItemText];
             } else {
-                newIput.value = requiredCourseIds[indexOfNewItemCode];
+                newInput.value = requiredCourseIds[indexOfNewItemCode];
             }
-            newIput.type = "hidden";
-            newIput.classList.add("CoursesId");
-            newListItem.appendChild(newIput);
+            newInput.type = "hidden";
+            newInput.classList.add("CoursesId");
+            newListItem.appendChild(newInput);
 
-            // Add a remove button to each list item
             var removeButton = document.createElement("button");
             removeButton.classList.add("btn", "btn-sm", "btn-outline-danger");
             removeButton.textContent = "Remove";
             removeButton.onclick = function () {
                 this.parentNode.remove();
-            }
+            };
             newListItem.appendChild(removeButton);
 
-            // Add the new list item to the existing list
-            var itemList = document.getElementById("itemList");
-            itemList.appendChild(newListItem);
-
-            // Clear the input field for the next item
+            document.getElementById("itemList").appendChild(newListItem);
             document.getElementById("newItem").value = "";
             event.preventDefault();
         }
+        function populateDatalist(datalistId, items) {
+            var datalist = document.getElementById(datalistId);
+            items.forEach(function (item) {
+                var option = document.createElement("option");
+                option.value = item;
+                datalist.appendChild(option);
+            });
+        }
+        document.getElementById("newItem").addEventListener("keypress", function (event) {
+            if (event.key === "Enter") {
+                event.preventDefault();
+                addItem();
+            }
+        });
+        populateDatalist("courseList", Courses);
+
         function removeItem() {
             this.parentNode.remove();
         }
