@@ -2,24 +2,34 @@
     ViewData["Title"] = "Home Page";
 }
 
-<div class="text-center">
+<div class="container-fluid text-center mt-5">
     <h1 class="display-4">Welcome</h1>
-    <p>this is Course Scheduler</p>
-    <div class="row">
-        <div class="col-3">
-            <a class="btn btn-primary" asp-controller="Teachers">Teachers</a>
+    <p class="lead">This is Course Scheduler</p>
+    <div class="row justify-content-center mt-4">
+        <div class="col-md-2 mb-3">
+            <a class="btn btn-primary btn-block" asp-controller="Teachers">Teachers</a>
         </div>
-        <div class="col-2">
-            <p>----></p>
+        <div class="col-md-1 align-self-center">
+            <i class="fas fa-angle-right fa-2x"></i>
         </div>
-        <div class="col-2">
-            <a class="btn btn-primary" asp-controller="Courses">Courses</a>
+        <div class="col-md-2 mb-3">
+            <a class="btn btn-primary btn-block" asp-controller="Groups">Groups</a>
         </div>
-        <div class="col-2">
-            <p>----></p>
+        <div class="col-md-1 align-self-center">
+            <i class="fas fa-angle-right fa-2x"></i>
         </div>
-        <div class="col-3">
-            <a class="btn btn-primary" asp-controller="Scheduler">Scheduler</a>
+        <div class="col-md-2 mb-3">
+            <a class="btn btn-primary btn-block" asp-controller="Courses">Courses</a>
+        </div>
+        <div class="col-md-1 align-self-center">
+            <i class="fas fa-angle-right fa-2x"></i>
+        </div>
+        <div class="col-md-2 mb-3">
+            <a class="btn btn-primary btn-block" asp-controller="Semester">Semester</a>
+        </div>
+        <br>
+        <div class="col-md-3 mb-3">
+            <a class="btn btn-success btn-block btn-lg" asp-controller="Scheduler">Scheduler</a>
         </div>
     </div>
 </div>
