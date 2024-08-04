@@ -14,7 +14,6 @@ This application is developed using C# and ASP.NET Core to help manage universit
 ## Requirements
 
 - .NET Core SDK 6.0 or higher
-- SQL Server or any compatible database
 - Visual Studio 2022 (optional but recommended for development)
 
 ## Installation
