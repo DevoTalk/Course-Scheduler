@@ -21,13 +21,13 @@ This application is developed using C# and ASP.NET Core to help manage universit
 1. **Clone the repository:**
 
     ```bash
-    git clone https://github.com/yourusername/university-course-scheduling-app.git
+    git clone https://github.com/DevoTalk/Course-Scheduler.git
     ```
 
 2. **Navigate to the project directory:**
 
     ```bash
-    cd university-course-scheduling-app
+    cd Course_Scheduler
     ```
 
 3. **Restore dependencies:**
@@ -36,29 +36,13 @@ This application is developed using C# and ASP.NET Core to help manage universit
     dotnet restore
     ```
 
-4. **Update database connection string:**
-
-    Open `appsettings.json` and update the `ConnectionStrings` section with your database information.
-
-    ```json
-    "ConnectionStrings": {
-        "DefaultConnection": "Server=your_server;Database=your_database;User Id=your_user;Password=your_password;"
-    }
-    ```
-
-5. **Apply migrations and update the database:**
-
-    ```bash
-    dotnet ef database update
-    ```
-
-6. **Run the application:**
+4. **Run the application:**
 
     ```bash
     dotnet run
     ```
 
-    The application should now be running at `https://localhost:5001` or `http://localhost:5000`.
+    The application should now be running at `https://localhost:5274`.
 
 ## Usage
 
