@@ -1,7 +1,7 @@
 ﻿@model Course_Scheduler.Models.ViewModels.AddCourseViewModel
 
 @{
-    ViewData["Title"] = "Create";
+    ViewData["Title"] = "Create Course";
 
     var teacherNames = Json.Serialize(((List<Teacher>)ViewBag.Teachers).Select(t => t.Name));
     var teacherCodes = Json.Serialize(((List<Teacher>)ViewBag.Teachers).Select(t => t.TeacherCode));
@@ -13,88 +13,130 @@
     var groupIds = Json.Serialize(((List<Group>)ViewData["Groups"]).Select(g => g.ID));
 }
 
-<h1>Create</h1>
-
-<h4>Course</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form id="addCourseForm" asp-action="Create">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-group">
-                <label asp-for="Course.Name" class="control-label"></label>
-                <input asp-for="Course.Name" class="form-control" />
-                <span asp-validation-for="Course.Name" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Course.Credits" class="control-label"></label>
-                <input asp-for="Course.Credits" class="form-control" />
-                <span asp-validation-for="Course.Credits" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Course.CourseCode" class="control-label"></label>
-                <input asp-for="Course.CourseCode" class="form-control" />
-                <span asp-validation-for="Course.CourseCode" class="text-danger"></span>
-            </div>
-            
-            
-            <div class="form-group">
-                <label asp-for="Course.CountOfClass" class="control-label"></label>
-                <input asp-for="Course.CountOfClass" class="form-control" />
-                <span asp-validation-for="Course.CountOfClass" class="text-danger"></span>
-            </div>
-            
-            
-            <div class="form-group">
-                <label asp-for="Course.Groups" class="control-label"></label>
-                <div class="input-group mb-3">
-                    <input type="text" id="newGroup" class="form-control" list="groupList" placeholder="Enter item here">
-                    <datalist id="groupList"></datalist>
-                    <button onclick="addGroup()" type="button" class="btn btn-primary">Add Item</button>
-                </div>
-                <ul id="GroupList" class="list-group"></ul>
-            </div>
-            
-            
-            <div class="form-group">
-                <label asp-for="Course.Prerequisites" class="control-label"></label>
-                <div class="input-group mb-3">
-                    <input type="text" id="newItem" class="form-control" list="courseList" placeholder="Enter item here">
-                    <datalist id="courseList"></datalist>
-                    <button onclick="addItem()" type="button" class="btn btn-primary">Add Item</button>
-                </div>
-                <ul id="itemList" class="list-group"></ul>
-            </div>
-
-            <div class="form-group">
-                <label asp-for="Course.CorequisiteCourses" class="control-label"></label>
-                <div class="input-group mb-3">
-                    <input type="text" id="newCorequisiteCoursesItem" class="form-control" list="corequisiteCourseList" placeholder="Enter item here">
-                    <datalist id="corequisiteCourseList"></datalist>
-                    <button onclick="addCorequisiteCoursesItem()" type="button" class="btn btn-primary">Add Item</button>
-                </div>
-                <ul id="CorequisiteCoursesItemList" class="list-group"></ul>
-            </div>
-            
-            <div class="form-group">
-                <label asp-for="TeachersId" class="control-label"></label>
-                <div class="input-group mb-3">
-                    <input type="text" id="newTeacher" class="form-control" list="teacherList" placeholder="Enter item here">
-                    <datalist id="teacherList"></datalist>
-                    <button onclick="addTeacher()" type="button" class="btn btn-primary">Add Item</button>
-                </div>
-                <ul id="TeacherList" class="list-group"></ul>
-            </div>
-
-            <div class="form-group">
-                <input type="button" onclick="submitForm()" value="Create" class="btn btn-primary" />
-            </div>
-        </form>
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col">
+            <h1 class="display-4 text-primary">
+                <i class="fas fa-plus-circle me-3"></i>Create Course
+            </h1>
+            <p class="text-muted">Add a new course to the system</p>
+        </div>
     </div>
-</div>
 
-<div>
-    <a asp-action="Index">Back to List</a>
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <form id="addCourseForm" asp-action="Create">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <div class="form-floating mb-3">
+                                    <input asp-for="Course.Name" class="form-control" placeholder="Course Name" />
+                                    <label asp-for="Course.Name"></label>
+                                    <span asp-validation-for="Course.Name" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-floating mb-3">
+                                    <input asp-for="Course.CourseCode" class="form-control" placeholder="Course Code" />
+                                    <label asp-for="Course.CourseCode"></label>
+                                    <span asp-validation-for="Course.CourseCode" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-floating mb-3">
+                                    <input asp-for="Course.Credits" class="form-control" placeholder="Credits" />
+                                    <label asp-for="Course.Credits"></label>
+                                    <span asp-validation-for="Course.Credits" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-floating mb-4">
+                            <input asp-for="Course.CountOfClass" class="form-control" placeholder="Number of Classes" />
+                            <label asp-for="Course.CountOfClass">Number of Classes per Week</label>
+                            <span asp-validation-for="Course.CountOfClass" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label"><i class="fas fa-users me-2"></i>Assigned Groups</label>
+                            <div class="input-group">
+                                <input type="text" id="newGroup" class="form-control" list="groupList" placeholder="Search and select groups...">
+                                <datalist id="groupList"></datalist>
+                                <button onclick="addGroup()" type="button" class="btn btn-outline-primary">
+                                    <i class="fas fa-plus me-2"></i>Add Group
+                                </button>
+                            </div>
+                            <ul id="GroupList" class="list-group mt-2"></ul>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label"><i class="fas fa-tasks me-2"></i>Prerequisites</label>
+                            <div class="input-group">
+                                <input type="text" id="newItem" class="form-control" list="courseList" placeholder="Search and select prerequisites...">
+                                <datalist id="courseList"></datalist>
+                                <button onclick="addItem()" type="button" class="btn btn-outline-primary">
+                                    <i class="fas fa-plus me-2"></i>Add Prerequisite
+                                </button>
+                            </div>
+                            <ul id="itemList" class="list-group mt-2"></ul>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label"><i class="fas fa-link me-2"></i>Corequisites</label>
+                            <div class="input-group">
+                                <input type="text" id="newCorequisiteCoursesItem" class="form-control" list="corequisiteCourseList" placeholder="Search and select corequisites...">
+                                <datalist id="corequisiteCourseList"></datalist>
+                                <button onclick="addCorequisiteCoursesItem()" type="button" class="btn btn-outline-primary">
+                                    <i class="fas fa-plus me-2"></i>Add Corequisite
+                                </button>
+                            </div>
+                            <ul id="CorequisiteCoursesItemList" class="list-group mt-2"></ul>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label"><i class="fas fa-chalkboard-teacher me-2"></i>Assigned Teachers</label>
+                            <div class="input-group">
+                                <input type="text" id="newTeacher" class="form-control" list="teacherList" placeholder="Search and select teachers...">
+                                <datalist id="teacherList"></datalist>
+                                <button onclick="addTeacher()" type="button" class="btn btn-outline-primary">
+                                    <i class="fas fa-plus me-2"></i>Add Teacher
+                                </button>
+                            </div>
+                            <ul id="TeacherList" class="list-group mt-2"></ul>
+                        </div>
+
+                        <div class="d-flex justify-content-between mt-4">
+                            <a asp-action="Index" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left me-2"></i>Back to List
+                            </a>
+                            <button type="button" onclick="submitForm()" class="btn btn-primary">
+                                <i class="fas fa-save me-2"></i>Create Course
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="fas fa-info-circle me-2"></i>Help</h5>
+                    <p class="card-text">Fill in the course details and add related information:</p>
+                    <ul class="list-unstyled">
+                        <li><i class="fas fa-check-circle text-success me-2"></i>Basic course information</li>
+                        <li><i class="fas fa-check-circle text-success me-2"></i>Assign student groups</li>
+                        <li><i class="fas fa-check-circle text-success me-2"></i>Set prerequisites</li>
+                        <li><i class="fas fa-check-circle text-success me-2"></i>Add corequisites</li>
+                        <li><i class="fas fa-check-circle text-success me-2"></i>Assign teachers</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 @section Scripts {
@@ -161,6 +203,31 @@
             });
         }
 
+        function createListItem(text, inputValue, inputClass) {
+            var newListItem = document.createElement("li");
+            newListItem.classList.add("list-group-item", "d-flex", "justify-content-between", "align-items-center");
+            
+            var itemText = document.createElement("span");
+            itemText.innerHTML = `<i class="fas fa-check-circle text-success me-2"></i>${text}`;
+            newListItem.appendChild(itemText);
+
+            var newInput = document.createElement("input");
+            newInput.value = inputValue;
+            newInput.type = "hidden";
+            newInput.classList.add(inputClass);
+            newListItem.appendChild(newInput);
+
+            var removeButton = document.createElement("button");
+            removeButton.classList.add("btn", "btn-outline-danger", "btn-sm");
+            removeButton.innerHTML = '<i class="fas fa-trash-alt me-1"></i>';
+            removeButton.onclick = function () {
+                this.parentNode.remove();
+            };
+            newListItem.appendChild(removeButton);
+
+            return newListItem;
+        }
+
         function addTeacher() {
             var newItemText = document.getElementById("newTeacher").value;
             var indexOfNewItemText = teacherNames.indexOf(newItemText);
@@ -168,25 +235,11 @@
 
             if (!newItemText || (indexOfNewItemText === -1 && indexOfNewItemCode === -1)) return;
 
-            var newListItem = document.createElement("li");
-            newListItem.classList.add("list-group-item", "d-flex", "justify-content-between", "align-items-center");
-            newListItem.textContent = indexOfNewItemCode === -1 ? newItemText : teacherNames[indexOfNewItemCode];
-
-            var newInput = document.createElement("input");
-            newInput.value = indexOfNewItemCode === -1 ? teacherIds[indexOfNewItemText] : teacherIds[indexOfNewItemCode];
-            newInput.type = "hidden";
-            newInput.classList.add("teachers");
-            newListItem.appendChild(newInput);
-
-            var removeButton = document.createElement("button");
-            removeButton.classList.add("btn", "btn-sm", "btn-outline-danger");
-            removeButton.textContent = "Remove";
-            removeButton.onclick = function () {
-                this.parentNode.remove();
-            };
-            newListItem.appendChild(removeButton);
-
-            document.getElementById("TeacherList").appendChild(newListItem);
+            var displayText = indexOfNewItemCode === -1 ? newItemText : teacherNames[indexOfNewItemCode];
+            var inputValue = indexOfNewItemCode === -1 ? teacherIds[indexOfNewItemText] : teacherIds[indexOfNewItemCode];
+            
+            var listItem = createListItem(displayText, inputValue, "teachers");
+            document.getElementById("TeacherList").appendChild(listItem);
             document.getElementById("newTeacher").value = "";
             event.preventDefault();
         }
@@ -198,25 +251,11 @@
 
             if (!newItemText || (indexOfNewItemText === -1 && indexOfNewItemCode === -1)) return;
 
-            var newListItem = document.createElement("li");
-            newListItem.classList.add("list-group-item", "d-flex", "justify-content-between", "align-items-center");
-            newListItem.textContent = indexOfNewItemCode === -1 ? newItemText : groupNames[indexOfNewItemCode];
-
-            var newInput = document.createElement("input");
-            newInput.value = indexOfNewItemCode === -1 ? groupIds[indexOfNewItemText] : groupIds[indexOfNewItemCode];
-            newInput.type = "hidden";
-            newInput.classList.add("Group");
-            newListItem.appendChild(newInput);
-
-            var removeButton = document.createElement("button");
-            removeButton.classList.add("btn", "btn-sm", "btn-outline-danger");
-            removeButton.textContent = "Remove";
-            removeButton.onclick = function () {
-                this.parentNode.remove();
-            };
-            newListItem.appendChild(removeButton);
-
-            document.getElementById("GroupList").appendChild(newListItem);
+            var displayText = indexOfNewItemCode === -1 ? newItemText : groupNames[indexOfNewItemCode];
+            var inputValue = indexOfNewItemCode === -1 ? groupIds[indexOfNewItemText] : groupIds[indexOfNewItemCode];
+            
+            var listItem = createListItem(displayText, inputValue, "Group");
+            document.getElementById("GroupList").appendChild(listItem);
             document.getElementById("newGroup").value = "";
             event.preventDefault();
         }
@@ -228,25 +267,11 @@
 
             if (!newItemText || (indexOfNewItemText === -1 && indexOfNewItemCode === -1)) return;
 
-            var newListItem = document.createElement("li");
-            newListItem.classList.add("list-group-item", "d-flex", "justify-content-between", "align-items-center");
-            newListItem.textContent = indexOfNewItemCode === -1 ? newItemText : requiredCourses[indexOfNewItemCode];
-
-            var newInput = document.createElement("input");
-            newInput.value = indexOfNewItemCode === -1 ? requiredCourseIds[indexOfNewItemText] : requiredCourseIds[indexOfNewItemCode];
-            newInput.type = "hidden";
-            newInput.classList.add("CorequisiteCourses");
-            newListItem.appendChild(newInput);
-
-            var removeButton = document.createElement("button");
-            removeButton.classList.add("btn", "btn-sm", "btn-outline-danger");
-            removeButton.textContent = "Remove";
-            removeButton.onclick = function () {
-                this.parentNode.remove();
-            };
-            newListItem.appendChild(removeButton);
-
-            document.getElementById("CorequisiteCoursesItemList").appendChild(newListItem);
+            var displayText = indexOfNewItemCode === -1 ? newItemText : requiredCourses[indexOfNewItemCode];
+            var inputValue = indexOfNewItemCode === -1 ? requiredCourseIds[indexOfNewItemText] : requiredCourseIds[indexOfNewItemCode];
+            
+            var listItem = createListItem(displayText, inputValue, "CorequisiteCourses");
+            document.getElementById("CorequisiteCoursesItemList").appendChild(listItem);
             document.getElementById("newCorequisiteCoursesItem").value = "";
             event.preventDefault();
         }
@@ -258,52 +283,28 @@
 
             if (!newItemText || (indexOfNewItemText === -1 && indexOfNewItemCode === -1)) return;
 
-            var newListItem = document.createElement("li");
-            newListItem.classList.add("list-group-item", "d-flex", "justify-content-between", "align-items-center");
-            newListItem.textContent = indexOfNewItemCode === -1 ? newItemText : requiredCourses[indexOfNewItemCode];
-
-            var newInput = document.createElement("input");
-            newInput.value = indexOfNewItemCode === -1 ? requiredCourseIds[indexOfNewItemText] : requiredCourseIds[indexOfNewItemCode];
-            newInput.type = "hidden";
-            newInput.classList.add("requiredCourses");
-            newListItem.appendChild(newInput);
-
-            var removeButton = document.createElement("button");
-            removeButton.classList.add("btn", "btn-sm", "btn-outline-danger");
-            removeButton.textContent = "Remove";
-            removeButton.onclick = function () {
-                this.parentNode.remove();
-            };
-            newListItem.appendChild(removeButton);
-
-            document.getElementById("itemList").appendChild(newListItem);
+            var displayText = indexOfNewItemCode === -1 ? newItemText : requiredCourses[indexOfNewItemCode];
+            var inputValue = indexOfNewItemCode === -1 ? requiredCourseIds[indexOfNewItemText] : requiredCourseIds[indexOfNewItemCode];
+            
+            var listItem = createListItem(displayText, inputValue, "requiredCourses");
+            document.getElementById("itemList").appendChild(listItem);
             document.getElementById("newItem").value = "";
             event.preventDefault();
         }
 
-        document.getElementById("newTeacher").addEventListener("keypress", function (event) {
-            if (event.key === "Enter") {
-                event.preventDefault();
-                addTeacher();
-            }
-        });
-        document.getElementById("newCorequisiteCoursesItem").addEventListener("keypress", function (event) {
-            if (event.key === "Enter") {
-                event.preventDefault();
-                addCorequisiteCoursesItem();
-            }
-        });
-        document.getElementById("newItem").addEventListener("keypress", function (event) {
-            if (event.key === "Enter") {
-                event.preventDefault();
-                addItem();
-            }
-        });
-        document.getElementById("newGroup").addEventListener("keypress", function (event) {
-            if (event.key === "Enter") {
-                event.preventDefault();
-                addGroup();
-            }
+        // Add Enter key handlers
+        ["newTeacher", "newCorequisiteCoursesItem", "newItem", "newGroup"].forEach(function(id) {
+            document.getElementById(id).addEventListener("keypress", function(event) {
+                if (event.key === "Enter") {
+                    event.preventDefault();
+                    switch(id) {
+                        case "newTeacher": addTeacher(); break;
+                        case "newCorequisiteCoursesItem": addCorequisiteCoursesItem(); break;
+                        case "newItem": addItem(); break;
+                        case "newGroup": addGroup(); break;
+                    }
+                }
+            });
         });
     </script>
 

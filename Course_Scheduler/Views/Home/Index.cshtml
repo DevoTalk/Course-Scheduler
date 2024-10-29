@@ -3,33 +3,120 @@
 }
 
 <div class="container-fluid text-center mt-5">
-    <h1 class="display-4">Welcome</h1>
-    <p class="lead">This is Course Scheduler</p>
-    <div class="row justify-content-center mt-4">
-        <div class="col-md-2 mb-3">
-            <a class="btn btn-primary btn-block" asp-controller="Teachers">Teachers</a>
-        </div>
-        <div class="col-md-1 align-self-center">
-            <i class="fas fa-angle-right fa-2x"></i>
-        </div>
-        <div class="col-md-2 mb-3">
-            <a class="btn btn-primary btn-block" asp-controller="Groups">Groups</a>
-        </div>
-        <div class="col-md-1 align-self-center">
-            <i class="fas fa-angle-right fa-2x"></i>
-        </div>
-        <div class="col-md-2 mb-3">
-            <a class="btn btn-primary btn-block" asp-controller="Courses">Courses</a>
-        </div>
-        <div class="col-md-1 align-self-center">
-            <i class="fas fa-angle-right fa-2x"></i>
-        </div>
-        <div class="col-md-2 mb-3">
-            <a class="btn btn-primary btn-block" asp-controller="Semester">Semester</a>
-        </div>
-        <br>
-        <div class="col-md-3 mb-3">
-            <a class="btn btn-success btn-block btn-lg" asp-controller="Scheduler">Scheduler</a>
+    <div class="hero-section mb-5">
+        <h1 class="display-3 fw-bold text-primary">Course Scheduler</h1>
+        <p class="lead text-muted">Streamline your university course planning with our intuitive scheduling system</p>
+    </div>
+
+    <div class="row justify-content-center mb-5">
+        <div class="col-lg-8">
+            <div class="card bg-light border-0 shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title text-primary"><i class="fas fa-tasks me-2"></i>Getting Started</h5>
+                    <p class="card-text">Follow these simple steps to create your perfect schedule</p>
+                </div>
+            </div>
         </div>
     </div>
+
+    <div class="row justify-content-center g-4 mb-5">
+        <div class="col-md-3">
+            <div class="card h-100 border-0 shadow-sm hover-card">
+                <div class="card-body">
+                    <a asp-controller="Teachers" class="text-decoration-none">
+                        <div class="icon-wrapper mb-3">
+                            <i class="fas fa-chalkboard-teacher fa-2x text-primary"></i>
+                        </div>
+                        <h5 class="card-title text-dark">Teachers</h5>
+                        <p class="card-text text-muted small">Manage teaching and times</p>
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card h-100 border-0 shadow-sm hover-card">
+                <div class="card-body">
+                    <a asp-controller="Groups" class="text-decoration-none">
+                        <div class="icon-wrapper mb-3">
+                            <i class="fas fa-users fa-2x text-primary"></i>
+                        </div>
+                        <h5 class="card-title text-dark">Groups</h5>
+                        <p class="card-text text-muted small">Organize groups</p>
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card h-100 border-0 shadow-sm hover-card">
+                <div class="card-body">
+                    <a asp-controller="Courses" class="text-decoration-none">
+                        <div class="icon-wrapper mb-3">
+                            <i class="fas fa-book fa-2x text-primary"></i>
+                        </div>
+                        <h5 class="card-title text-dark">Courses</h5>
+                        <p class="card-text text-muted small">Set up courses and prerequisites</p>
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card h-100 border-0 shadow-sm hover-card">
+                <div class="card-body">
+                    <a asp-controller="Semester" class="text-decoration-none">
+                        <div class="icon-wrapper mb-3">
+                            <i class="fas fa-calendar-alt fa-2x text-primary"></i>
+                        </div>
+                        <h5 class="card-title text-dark">Semester</h5>
+                        <p class="card-text text-muted small">Configure semester parameters</p>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <a asp-controller="Scheduler" class="btn btn-lg btn-primary shadow-lg w-100 generate-btn">
+                <i class="fas fa-clock me-2"></i>
+                Generate Schedule
+            </a>
+        </div>
+    </div>
+
+    <style>
+        .hero-section {
+            background: linear-gradient(to right, #f8f9fa, #e9ecef);
+            padding: 3rem 0;
+            border-radius: 1rem;
+        }
+        
+        .hover-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .hover-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 .5rem 1rem rgba(0,0,0,.15)!important;
+        }
+        
+        .icon-wrapper {
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .generate-btn {
+            padding: 1rem 2rem;
+            font-size: 1.25rem;
+            transition: all 0.3s ease;
+            background: linear-gradient(45deg, #007bff, #0056b3);
+            border: none;
+        }
+        
+        .generate-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 .5rem 1rem rgba(0,0,0,.25)!important;
+        }
+    </style>
 </div>

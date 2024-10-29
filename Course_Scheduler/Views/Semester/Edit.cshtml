@@ -1,60 +1,82 @@
 ﻿@model Course_Scheduler.Models.ViewModels.AddSemesterViewModel
 
-
 @{
     ViewData["Title"] = "Edit";
     var courses = (List<Course>)ViewData["Courses"];
     var json = Json.Serialize((courses).Select(c => c.Name));
     var reqIdjson = Json.Serialize((courses).Select(c => c.ID));
     var courseCode = Json.Serialize((courses).Select(c => c.CourseCode));
-
 }
 
-
-<h1>Create</h1>
-
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form id="addCoursefrom" asp-action="Create">
-            <input type="hidden" value="@Model.ID" />
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-group">
-                <label asp-for="Name" class="control-label"></label>
-                <input asp-for="Name" class="form-control" />
-                <span asp-validation-for="Name" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="CoursesId" class="control-label"></label>
-                <div class="input-group mb-3">
-                    <input type="text" id="newItem" class="form-control" placeholder="Enter item here" list="courseList">
-                    <datalist id="courseList"></datalist>
-                    <button onclick="addItem()" type="button" class="btn btn-primary">Add Item</button>
-                </div>
-                <ul id="itemList" class="list-group"></ul>
-                @foreach (var item in Model.CoursesId)
-                {
-                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                        @(courses.First(c => c.ID == item).Name)
-                        <input type="hidden" value="@item" class="requiredCourses">
-                        <button class="btn btn-sm btn-outline-danger" type="button" onclick="RemoveItem(this)">Remove</button>
-                    </li>
-                }
-            </div>
-            <div class="form-group">
-                <input type="button" onclick="submitFrom()" value="Create" class="btn btn-primary" />
-            </div>
-        </form>
+<div class="container">
+    <div class="row mb-4">
+        <div class="col">
+            <h1 class="display-4 text-primary">
+                <i class="fas fa-edit me-3"></i>Edit Semester
+            </h1>
+            <p class="text-muted">Modify semester details and courses</p>
+        </div>
     </div>
-</div>
 
-<div>
-    <a asp-action="Index">Back to List</a>
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <form id="addCoursefrom" asp-action="Create">
+                <input type="hidden" value="@Model.ID" />
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                
+                <div class="mb-4">
+                    <label asp-for="Name" class="form-label fw-bold">
+                        <i class="fas fa-calendar me-2"></i>Semester Name
+                    </label>
+                    <input asp-for="Name" class="form-control" placeholder="Enter semester name"/>
+                    <span asp-validation-for="Name" class="text-danger"></span>
+                </div>
+
+                <div class="mb-4">
+                    <label asp-for="CoursesId" class="form-label fw-bold">
+                        <i class="fas fa-book me-2"></i>Courses
+                    </label>
+                    <div class="input-group mb-3">
+                        <input type="text" id="newItem" class="form-control" placeholder="Search for a course..." list="courseList">
+                        <datalist id="courseList"></datalist>
+                        <button onclick="addItem()" type="button" class="btn btn-primary">
+                            <i class="fas fa-plus me-2"></i>Add Course
+                        </button>
+                    </div>
+
+                    <div class="card">
+                        <ul id="itemList" class="list-group list-group-flush">
+                            @foreach (var item in Model.CoursesId)
+                            {
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    <span><i class="fas fa-check-circle text-success me-2"></i>@(courses.First(c => c.ID == item).Name)</span>
+                                    <div>
+                                        <input type="hidden" value="@item" class="requiredCourses">
+                                        <button class="btn btn-outline-danger btn-sm" type="button" onclick="RemoveItem(this)">
+                                            <i class="fas fa-trash-alt me-1"></i>Remove
+                                        </button>
+                                    </div>
+                                </li>
+                            }
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-between mt-4">
+                    <a asp-action="Index" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left me-2"></i>Back to List
+                    </a>
+                    <button type="button" onclick="submitFrom()" class="btn btn-primary">
+                        <i class="fas fa-save me-2"></i>Save Changes
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
 </div>
 
 @section Scripts {
     <script>
-
         function submitFrom() {
             var from = document.getElementById("addCoursefrom");
             EditNameOfRequiredCourses();
@@ -77,42 +99,40 @@
         console.log(requiredCourseIds);
         console.log(courseCode);
 
-
         function addItem() {
             var newItemText = document.getElementById("newItem").value;
             var indexOfNewItemText = Courses.indexOf(newItemText);
             var indexOfNewItemCode = courseCode.indexOf(newItemText);
-            if (!newItemText || (indexOfNewItemText === -1 && indexOfNewItemCode === -1)) return; // Prevent empty items
+            if (!newItemText || (indexOfNewItemText === -1 && indexOfNewItemCode === -1)) return;
 
             var newListItem = document.createElement("li");
             newListItem.classList.add("list-group-item", "d-flex", "justify-content-between", "align-items-center");
-            if (indexOfNewItemCode == -1) {
-                newListItem.textContent = newItemText;
-            } else {
-                newListItem.textContent = Courses[indexOfNewItemCode];
-            }
+            
+            var itemText = document.createElement("span");
+            itemText.innerHTML = `<i class="fas fa-check-circle text-success me-2"></i>${indexOfNewItemCode == -1 ? newItemText : Courses[indexOfNewItemCode]}`;
+            newListItem.appendChild(itemText);
+
             var newInput = document.createElement("input");
-            if (indexOfNewItemCode == -1) {
-                newInput.value = requiredCourseIds[indexOfNewItemText];
-            } else {
-                newInput.value = requiredCourseIds[indexOfNewItemCode];
-            }
+            newInput.value = indexOfNewItemCode == -1 ? requiredCourseIds[indexOfNewItemText] : requiredCourseIds[indexOfNewItemCode];
             newInput.type = "hidden";
             newInput.classList.add("CoursesId");
             newListItem.appendChild(newInput);
 
+            var buttonContainer = document.createElement("div");
             var removeButton = document.createElement("button");
-            removeButton.classList.add("btn", "btn-sm", "btn-outline-danger");
-            removeButton.textContent = "Remove";
+            removeButton.classList.add("btn", "btn-outline-danger", "btn-sm");
+            removeButton.innerHTML = '<i class="fas fa-trash-alt me-1"></i>Remove';
             removeButton.onclick = function () {
-                this.parentNode.remove();
+                this.closest("li").remove();
             };
-            newListItem.appendChild(removeButton);
+            buttonContainer.appendChild(removeButton);
+            newListItem.appendChild(buttonContainer);
 
             document.getElementById("itemList").appendChild(newListItem);
             document.getElementById("newItem").value = "";
             event.preventDefault();
         }
+
         function populateDatalist(datalistId, items) {
             var datalist = document.getElementById(datalistId);
             items.forEach(function (item) {
@@ -121,12 +141,14 @@
                 datalist.appendChild(option);
             });
         }
+
         document.getElementById("newItem").addEventListener("keypress", function (event) {
             if (event.key === "Enter") {
                 event.preventDefault();
                 addItem();
             }
         });
+
         populateDatalist("courseList", Courses);
 
         function removeItem() {

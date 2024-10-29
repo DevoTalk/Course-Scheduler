@@ -1,36 +1,57 @@
 ﻿@model IEnumerable<Course_Scheduler.Models.Semester>
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Semesters";
 }
 
-<h1>Index</h1>
+<div class="container">
+    <div class="row mb-4">
+        <div class="col">
+            <h1 class="display-4 text-primary">
+                <i class="fas fa-calendar-alt me-3"></i>Semesters
+            </h1>
+            <p class="text-muted">View and manage academic semesters</p>
+        </div>
+    </div>
 
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Name)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var item in Model)
-        {
-            <tr>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Name)
-                </td>
+    <div class="row mb-3">
+        <div class="col">
+            <a asp-action="Create" class="btn btn-primary">
+                <i class="fas fa-plus me-2"></i>Create New Semester
+            </a>
+        </div>
+    </div>
 
-                <td>
-                    <a asp-action="Edit" asp-route-id="@item.ID">Edit</a> |
-                    <a asp-action="Delete" asp-route-id="@item.ID">Delete</a>
-                </td>
-            </tr>
-        }
-    </tbody>
-</table>
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th>
+                                <i class="fas fa-calendar me-2"></i>@Html.DisplayNameFor(model => model.Name)
+                            </th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td class="align-middle">@Html.DisplayFor(modelItem => item.Name)</td>
+                                <td class="text-end">
+                                    <a asp-action="Edit" asp-route-id="@item.ID" class="btn btn-outline-primary btn-sm">
+                                        <i class="fas fa-edit me-1"></i>Edit
+                                    </a>
+                                    <a asp-action="Delete" asp-route-id="@item.ID" class="btn btn-outline-danger btn-sm ms-2">
+                                        <i class="fas fa-trash-alt me-1"></i>Delete
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

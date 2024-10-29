@@ -4,157 +4,214 @@
     ViewData["Title"] = "Edit Teacher";
 }
 
-<h1>Edit Teacher</h1>
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col">
+            <h1 class="display-4 text-primary">
+                <i class="fas fa-edit me-3"></i>Edit Teacher
+            </h1>
+            <p class="text-muted">Update teacher information and preferences</p>
+        </div>
+    </div>
 
-<hr />
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <form asp-action="Edit" method="post" id="Form">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="form-floating mb-3">
+                                    <input asp-for="Name" class="form-control" placeholder="Name" required />
+                                    <label asp-for="Name"></label>
+                                    <span asp-validation-for="Name" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating mb-3">
+                                    <input asp-for="TeacherCode" class="form-control" placeholder="Teacher Code" required />
+                                    <label asp-for="TeacherCode"></label>
+                                    <span asp-validation-for="TeacherCode" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating mb-3">
+                                    <input asp-for="MaximumDayCount" class="form-control" placeholder="Maximum Day Count" required min="1" />
+                                    <label asp-for="MaximumDayCount"></label>
+                                    <span asp-validation-for="MaximumDayCount" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating mb-3">
+                                    <input asp-for="PenaltyForEmptyTime" class="form-control" placeholder="Penalty For Empty Time" required min="0" />
+                                    <label asp-for="PenaltyForEmptyTime"></label>
+                                    <span asp-validation-for="PenaltyForEmptyTime" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
 
-<div>
+                        <input type="hidden" asp-for="ID" />
+                        @for (int i = 0; i < Enum.GetValues(typeof(ClassTimes)).Length; i++)
+                        {
+                            var time = (ClassTimes)Enum.GetValues(typeof(ClassTimes)).GetValue(i);
+                            if(Model.PreferredTime.Select(p=>p.PreferredTime).Contains(time))
+                            {
+                                <input type="hidden" name="PreferredTime[@i].PreferredTime" value="@time" id="PreferredTime_@i" class="PreferredTimeInput">
+                                <input type="hidden" name="PreferredTime[@i].Penalty" value="@Model.PreferredTime.First(p=>p.PreferredTime==time).Penalty" id="HiddenPreferredTimePenalty_@i" class="PenaltyInput">
+                            }
+                        }
 
-    <form asp-action="Edit" method="post" id="Form">
-        <div class="form-group">
-            <label asp-for="Name" class="control-label"></label>
-            <input asp-for="Name" class="form-control" />
-            <span asp-validation-for="Name" class="text-danger"></span>
-            <div class="form-group">
-                <label asp-for="TeacherCode" class="control-label"></label>
-                <input asp-for="TeacherCode" class="form-control" />
-                <span asp-validation-for="TeacherCode" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="MaximumDayCount" class="control-label"></label>
-                <input asp-for="MaximumDayCount" class="form-control" />
-                <span asp-validation-for="MaximumDayCount" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="PenaltyForEmptyTime" class="control-label"></label>
-                <input asp-for="PenaltyForEmptyTime" class="form-control" />
-                <span asp-validation-for="PenaltyForEmptyTime" class="text-danger"></span>
+                        <div class="card mt-4">
+                            <div class="card-header bg-light">
+                                <h5 class="mb-0"><i class="fas fa-clock me-2"></i>Preferred Time with Penalties</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-hover">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th>Time Slot</th>
+                                                <th>Preference</th>
+                                                <th>Penalty Points</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @for (int i = 0; i < Enum.GetValues(typeof(ClassTimes)).Length; i++)
+                                            {
+                                                var time = (ClassTimes)Enum.GetValues(typeof(ClassTimes)).GetValue(i);
+                                                var isInList = Model.PreferredTime.Select(p => p.PreferredTime).Contains(time);
+                                                <tr>
+                                                    <td class="align-middle">@time</td>
+                                                    <td class="align-middle">
+                                                        <div class="form-check form-switch">
+                                                            <input type="checkbox" class="form-check-input PreferredTime" 
+                                                                onchange="handleCheckboxChange(@i)" 
+                                                                id="PreferredTimeCheckbox_@i"
+                                                                @(isInList ? "checked" : "") />
+                                                            <input type="hidden" id="PreferredTimeValue_@i" value="@time">
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <div class="input-group">
+                                                            <input type="number" 
+                                                                class="form-control penaltyInput" 
+                                                                name="PreferredTime[@i].Penalty" 
+                                                                min="0"
+                                                                id="PreferredTimePenalty_@i"
+                                                                value="@(isInList ? Model.PreferredTime.First(p=>p.PreferredTime==time).Penalty.ToString() : "")"
+                                                                data-index="@i"
+                                                                @(!isInList ? "disabled" : "")
+                                                                placeholder="Enter penalty" 
+                                                                required />
+                                                            <span class="input-group-text">points</span>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mt-4 d-flex gap-2 flex-column fixed-footer-btn">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-save me-2"></i>Save Changes
+                            </button>
+                            <a asp-action="Index" class="btn btn-outline-secondary btn-lg">
+                                <i class="fas fa-arrow-left me-2"></i>Back to List
+                            </a>
+                        </div>
+
+                    </form>
+                </div>
             </div>
         </div>
-        
-        <input type="hidden" asp-for="ID" />
-        @for (int i = 0; i < Enum.GetValues(typeof(ClassTimes)).Length; i++)
-        {
-            var time = (ClassTimes)Enum.GetValues(typeof(ClassTimes)).GetValue(i);
-            if(Model.PreferredTime.Select(p=>p.PreferredTime).Contains(time))
-            {
-                <input type="hidden" name="PreferredTime[@i].PreferredTime" value=@time.ToString() id="PreferredTime(@i)" class="PreferredTimeInput">
-                <input type="hidden" name="PreferredTime[@i].Penalty" value=@Model.PreferredTime.First(p=>p.PreferredTime==time).Penalty.ToString() id="HiddenPreferredTimePenalty(@i)" class="PenaltyInput">
-            }
+    </div>
+</div>
+@section style{
+    <style>
+        .fixed-bottom{
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
         }
+        .fixed-footer-btn {
+            position: sticky;
+            bottom: 0;
+            background: #fff;
+            padding-top: 10px;
+        }
+        .container, .row, .card {
+    overflow: visible !important;
+}
 
-
-    </form>
-
-
-    <div class="form-group">
-        <label class="control-label">Preferred Time with Penalties:</label>
-        <br />
-        <table class="table table-bordered">
-            <thead>
-                <tr>
-                    <th>Time</th>
-                    <th>Has Preference</th>
-                    <th>Penalty</th>
-                </tr>
-            </thead>
-            <tbody>
-                @for (int i = 0; i < Enum.GetValues(typeof(ClassTimes)).Length; i++)
-                {
-                    var time = (ClassTimes)Enum.GetValues(typeof(ClassTimes)).GetValue(i);
-                    var isInList = Model.PreferredTime.Select(p => p.PreferredTime).Contains(time);
-                    <tr>
-                        <td>@time</td>
-                        <td>
-                            <input type="checkbox" onchange="CheckedChenge(@i)" id="PreferredTimeCheckbox(@i)" class="PreferredTime" @(isInList ? "checked" : "") />
-
-                            <input type="hidden" id="PreferredTimeValue(@i)" value="@time">
-                        </td>
-                        <td>
-                            @if (isInList)
-                            {
-                                <input type="number" class="penaltyInput" name=PreferredTime[@i].Penalty min="0" id="PreferredTimePenalty(@i)" value=@Model.PreferredTime.First(p=>p.PreferredTime==time).Penalty.ToString() index="@i">
-
-                            }else{
-                                <input type="number" class="penaltyInput" name=PreferredTime[@i].Penalty min="0" id="PreferredTimePenalty(@i)" index="@i" disabled>
-                            }
-                        </td>
-                    </tr>
-                }
-            </tbody>
-        </table>
-    </div>
-
-    <div class="form-group">
-        <input type="button" value="Edit" onclick="submitClicked()" class="btn btn-primary" />
-    </div>
-</div>
-<div>
-    <a asp-action="Index">Back to List</a>
-</div>
-
-
+    </style>
+}
 @section Scripts {
     <script>
-        function CheckedChenge(index) {
-            var checkbox = document.getElementById('PreferredTimeCheckbox(' + index + ')');
-            var timeValueInput = document.getElementById('PreferredTimeValue(' + index + ')');
-            var penaltyInput = document.getElementById('PreferredTimePenalty(' + index + ')');
-            var form = document.getElementById('Form');
-
+        function handleCheckboxChange(index) {
+            const checkbox = document.getElementById(`PreferredTimeCheckbox_${index}`);
+            const timeValueInput = document.getElementById(`PreferredTimeValue_${index}`);
+            const penaltyInput = document.getElementById(`PreferredTimePenalty_${index}`);
+            const form = document.getElementById('Form');
 
             if (checkbox.checked) {
-
                 penaltyInput.disabled = false;
+                penaltyInput.required = true;
 
-
-                var hiddenInput = document.createElement('input');
+                const hiddenInput = document.createElement('input');
                 hiddenInput.type = 'hidden';
-                hiddenInput.name = penaltyInput.name; // Assign the same name
-                hiddenInput.value = penaltyInput.value; // Assign the same value
-                hiddenInput.id = 'HiddenPreferredTimePenalty(' + index + ')';
+                hiddenInput.name = penaltyInput.name;
+                hiddenInput.value = penaltyInput.value || '0';
+                hiddenInput.id = `HiddenPreferredTimePenalty_${index}`;
                 hiddenInput.className = 'PenaltyInput';
 
-                var timeInput = document.createElement('input');
+                const timeInput = document.createElement('input');
                 timeInput.type = 'hidden';
-                timeInput.name = 'PreferredTime[' + index + '].PreferredTime';
+                timeInput.name = `PreferredTime[${index}].PreferredTime`;
                 timeInput.value = timeValueInput.value;
-                timeInput.id = 'PreferredTime(' + index + ')';
+                timeInput.id = `PreferredTime_${index}`;
                 timeInput.className = 'PreferredTimeInput';
+                
                 form.appendChild(timeInput);
                 form.appendChild(hiddenInput);
             } else {
-                var timeInput = document.getElementById('PreferredTime(' + index + ')');
-                form.removeChild(timeInput);
-                var hiddenInputForRemove = document.getElementById('HiddenPreferredTimePenalty(' + index + ')');
-                form.removeChild(hiddenInputForRemove);
-                penaltyInput.value = "";
                 penaltyInput.disabled = true;
+                penaltyInput.required = false;
+                penaltyInput.value = '';
 
+                const timeInput = document.getElementById(`PreferredTime_${index}`);
+                const hiddenInput = document.getElementById(`HiddenPreferredTimePenalty_${index}`);
+                
+                if (timeInput) form.removeChild(timeInput);
+                if (hiddenInput) form.removeChild(hiddenInput);
             }
-            updateIndexAndSortInputs();
-        }
-        function updateIndexAndSortInputs() {
-            // Get all the hidden input elements
-            var preferredTimeInputs = document.querySelectorAll('input[class="PreferredTimeInput"]');
-            var PenaltyInputs = document.querySelectorAll('input[class="PenaltyInput"]');
-            for (var i = 0; i < preferredTimeInputs.length; i++) {
-                preferredTimeInputs[i].name = 'PreferredTime[' + i + '].PreferredTime';
-            }
-            for (var i = 0; i < PenaltyInputs.length; i++) {
-                PenaltyInputs[i].name = 'PreferredTime[' + i + '].Penalty';
-            }
+            updateIndexes();
         }
 
-        function submitClicked() {
-            var form = document.getElementById('Form');
-            form.submit();
+        function updateIndexes() {
+            const preferredTimeInputs = document.querySelectorAll('.PreferredTimeInput');
+            const penaltyInputs = document.querySelectorAll('.PenaltyInput');
+            
+            preferredTimeInputs.forEach((input, index) => {
+                input.name = `PreferredTime[${index}].PreferredTime`;
+            });
+            
+            penaltyInputs.forEach((input, index) => {
+                input.name = `PreferredTime[${index}].Penalty`;
+            });
         }
-        $(".penaltyInput").on("change", function () {
-            var index = this.getAttribute("index");
-            var penaltyInput = document.getElementById('PreferredTimePenalty(' + index + ')');
-            var hiddenInput = document.getElementById('HiddenPreferredTimePenalty(' + index + ')');
-            hiddenInput.value = penaltyInput.value;
+
+        document.querySelectorAll('.penaltyInput').forEach(input => {
+            input.addEventListener('change', function() {
+                const index = this.getAttribute('data-index');
+                const hiddenInput = document.getElementById(`HiddenPreferredTimePenalty_${index}`);
+                if (hiddenInput) {
+                    hiddenInput.value = this.value || '0';
+                }
+            });
         });
     </script>
 }

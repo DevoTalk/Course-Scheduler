@@ -1,7 +1,7 @@
 ﻿@model Course_Scheduler.Models.ViewModels.AddCourseViewModel
 
 @{
-    ViewData["Title"] = "Edit";
+    ViewData["Title"] = "Edit Course";
 
     var teacherNames = Json.Serialize(((List<Teacher>)ViewBag.Teachers).Select(t => t.Name));
     var teacherCodes = Json.Serialize(((List<Teacher>)ViewBag.Teachers).Select(t => t.TeacherCode));
@@ -13,128 +13,187 @@
     var groupIds = Json.Serialize(((List<Group>)ViewData["Groups"]).Select(g => g.ID));
 }
 
-<h1>Edit</h1>
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <h1 class="display-4 mb-3">Edit Course</h1>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a asp-action="Index">Courses</a></li>
+                    <li class="breadcrumb-item active">Edit</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
 
-<h4>Course</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form id="addCoursefrom" asp-action="Edit">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-group">
-                <label asp-for="Course.Name" class="control-label"></label>
-                <input asp-for="Course.Name" class="form-control" />
-                <span asp-validation-for="Course.Name" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Course.Credits" class="control-label"></label>
-                <input asp-for="Course.Credits" class="form-control" />
-                <span asp-validation-for="Course.Credits" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Course.CourseCode" class="control-label"></label>
-                <input asp-for="Course.CourseCode" class="form-control" />
-                <span asp-validation-for="Course.CourseCode" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Course.CountOfClass" class="control-label"></label>
-                <input asp-for="Course.CountOfClass" class="form-control" />
-                <span asp-validation-for="Course.CountOfClass" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Course.Groups" class="control-label"></label>
-                <div class="input-group mb-3">
-                    <input type="text" id="newGroup" class="form-control" list="groupList" placeholder="Enter item here">
-                    <datalist id="groupList"></datalist>
-                    <button onclick="addGroup()" type="button" class="btn btn-primary">Add Item</button>
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <form id="addCoursefrom" asp-action="Edit">
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="Course.Name" class="form-label fw-bold"></label>
+                                <input asp-for="Course.Name" class="form-control" placeholder="Enter course name"/>
+                                <span asp-validation-for="Course.Name" class="text-danger"></span>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="Course.CourseCode" class="form-label fw-bold"></label>
+                                <input asp-for="Course.CourseCode" class="form-control" placeholder="Enter course code"/>
+                                <span asp-validation-for="Course.CourseCode" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="Course.Credits" class="form-label fw-bold"></label>
+                                <input asp-for="Course.Credits" class="form-control" placeholder="Enter credits"/>
+                                <span asp-validation-for="Course.Credits" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="Course.CountOfClass" class="form-label fw-bold"></label>
+                                <input asp-for="Course.CountOfClass" class="form-control" placeholder="Enter class count"/>
+                                <span asp-validation-for="Course.CountOfClass" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label asp-for="Course.Groups" class="form-label fw-bold"></label>
+                            <div class="input-group">
+                                <input type="text" id="newGroup" class="form-control" list="groupList" placeholder="Search and select group">
+                                <datalist id="groupList"></datalist>
+                                <button onclick="addGroup()" type="button" class="btn btn-outline-primary">
+                                    <i class="bi bi-plus-lg"></i> Add
+                                </button>
+                            </div>
+                            <div class="mt-2">
+                                <ul id="GroupList" class="list-group">
+                                    @foreach (var item in Model.GroupIds)
+                                    {
+                                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                                            @(((List<Group>)ViewData["Groups"]).First(c => c.ID == item).Name)
+                                            <input type="hidden" value="@item" class="Group">
+                                            <button class="btn btn-sm btn-outline-danger" type="button" onclick="RemoveItem(this)">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </li>
+                                    }
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label asp-for="Course.Prerequisites" class="form-label fw-bold"></label>
+                            <div class="input-group">
+                                <input type="text" id="newItem" class="form-control" list="courseList" placeholder="Search and select prerequisite">
+                                <datalist id="courseList"></datalist>
+                                <button onclick="addItem()" type="button" class="btn btn-outline-primary">
+                                    <i class="bi bi-plus-lg"></i> Add
+                                </button>
+                            </div>
+                            <div class="mt-2">
+                                <ul id="itemList" class="list-group">
+                                    @foreach (var item in Model.PrerequisitesId)
+                                    {
+                                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                                            @(((List<Course>)ViewData["RequiredCourse"]).First(c => c.ID == item).Name)
+                                            <input type="hidden" value="@item" class="requiredCourses">
+                                            <button class="btn btn-sm btn-outline-danger" type="button" onclick="RemoveItem(this)">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </li>
+                                    }
+                                </ul>
+                            </div>
+                            <span asp-validation-for="Course.Prerequisites" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-4">
+                            <label asp-for="Course.CorequisiteCourses" class="form-label fw-bold"></label>
+                            <div class="input-group">
+                                <input type="text" id="newCorequisiteCoursesItem" class="form-control" list="corequisiteCourseList" placeholder="Search and select corequisite">
+                                <datalist id="corequisiteCourseList"></datalist>
+                                <button onclick="addCorequisiteCoursesItem()" type="button" class="btn btn-outline-primary">
+                                    <i class="bi bi-plus-lg"></i> Add
+                                </button>
+                            </div>
+                            <div class="mt-2">
+                                <ul id="CorequisiteCoursesItemList" class="list-group">
+                                    @foreach (var item in Model.CorequisitesId)
+                                    {
+                                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                                            @(((List<Course>)ViewData["RequiredCourse"]).First(c => c.ID == item).Name)
+                                            <input type="hidden" value="@item" class="CorequisiteCourses">
+                                            <button class="btn btn-sm btn-outline-danger" type="button" onclick="RemoveItem(this)">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </li>
+                                    }
+                                </ul>
+                            </div>
+                            <span asp-validation-for="Course.CorequisiteCourses" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-4">
+                            <label asp-for="TeachersId" class="form-label fw-bold"></label>
+                            <div class="input-group">
+                                <input type="text" id="newTeacher" class="form-control" list="teacherList" placeholder="Search and select teacher">
+                                <datalist id="teacherList"></datalist>
+                                <button onclick="addTeacher()" type="button" class="btn btn-outline-primary">
+                                    <i class="bi bi-plus-lg"></i> Add
+                                </button>
+                            </div>
+                            <div class="mt-2">
+                                <ul id="TeacherList" class="list-group">
+                                    @foreach (var item in Model.TeachersId)
+                                    {
+                                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                                            @(((List<Teacher>)ViewBag.Teachers).First(c => c.ID == item).Name)
+                                            <input type="hidden" value="@item" class="teachers">
+                                            <button class="btn btn-sm btn-outline-danger" type="button" onclick="RemoveItem(this)">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </li>
+                                    }
+                                </ul>
+                            </div>
+                            <span asp-validation-for="TeachersId" class="text-danger"></span>
+                        </div>
+
+                        <input type="hidden" asp-for="Course.ID" />
+                        
+                        <div class="d-flex justify-content-between mt-4">
+                            <a asp-action="Index" class="btn btn-outline-secondary">
+                                <i class="bi bi-arrow-left"></i> Back to List
+                            </a>
+                            <button type="button" onclick="submitForm()" class="btn btn-primary">
+                                <i class="bi bi-save"></i> Save Changes
+                            </button>
+                        </div>
+                    </form>
                 </div>
-                <ul id="GroupList" class="list-group">
-                    @foreach (var item in Model.GroupIds)
-                    {
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                            @(((List<Group>)ViewData["Groups"]).First(c => c.ID == item).Name)
-                            <input type="hidden" value="@item" class="Group">
-                            <button class="btn btn-sm btn-outline-danger" type="button" onclick="RemoveItem(this)">Remove</button>
-                        </li>
-                    }
-                </ul>
             </div>
-
-            <div class="form-group">
-                <label asp-for="Course.Prerequisites" class="control-label"></label>
-                <div class="input-group mb-3">
-                    <input type="text" id="newItem" class="form-control" list="courseList" placeholder="Enter item here">
-                    <datalist id="courseList"></datalist>
-                    <button onclick="addItem()" type="button" class="btn btn-primary">Add Item</button>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">Help</h5>
+                    <p class="card-text">
+                        Fill in the course details and add related items using the search fields. 
+                        Click the Add button or press Enter to add items to the lists.
+                    </p>
                 </div>
-                <ul id="itemList" class="list-group">
-                    @foreach (var item in Model.PrerequisitesId)
-                    {
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                            @(((List<Course>)ViewData["RequiredCourse"]).First(c => c.ID == item).Name)
-                            <input type="hidden" value="@item" class="requiredCourses">
-                            <button class="btn btn-sm btn-outline-danger" type="button" onclick="RemoveItem(this)">Remove</button>
-                        </li>
-                    }
-                </ul>
-                <span asp-validation-for="Course.Prerequisites" class="text-danger"></span>
-
             </div>
-            <div class="form-group">
-                <label asp-for="Course.CorequisiteCourses" class="control-label"></label>
-                <div class="input-group mb-3">
-                    <input type="text" id="newCorequisiteCoursesItem" class="form-control" list="corequisiteCourseList" placeholder="Enter item here">
-                    <datalist id="corequisiteCourseList"></datalist>
-                    <button onclick="addCorequisiteCoursesItem()" type="button" class="btn btn-primary">Add Item</button>
-                </div>
-                <ul id="CorequisiteCoursesItemList" class="list-group">
-                    @foreach (var item in Model.CorequisitesId)
-                    {
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                            @(((List<Course>)ViewData["RequiredCourse"]).First(c => c.ID == item).Name)
-                            <input type="hidden" value="@item" class="CorequisiteCourses">
-                            <button class="btn btn-sm btn-outline-danger" type="button" onclick="RemoveItem(this)">Remove</button>
-                        </li>
-                    }
-                </ul>
-                <span asp-validation-for="Course.CorequisiteCourses" class="text-danger"></span>
-
-            </div>
-
-            <div class="form-group">
-                <label asp-for="TeachersId" class="control-label"></label>
-                <div class="input-group mb-3">
-                    <input type="text" id="newTeacher" class="form-control" list="teacherList" placeholder="Enter item here">
-                    <datalist id="teacherList"></datalist>
-                    <button onclick="addTeacher()" type="button" class="btn btn-primary">Add Item</button>
-                </div>
-                <ul id="TeacherList" class="list-group">
-                    @foreach (var item in Model.TeachersId)
-                    {
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                            @(((List<Teacher>)ViewBag.Teachers).First(c => c.ID == item).Name)
-                            <input type="hidden" value="@item" class="teachers">
-                            <button class="btn btn-sm btn-outline-danger" type="button" onclick="RemoveItem(this)">Remove</button>
-                        </li>
-                    }
-                </ul>
-                <span asp-validation-for="TeachersId" class="text-danger"></span>
-            </div>
-
-            <input type="hidden" asp-for="Course.ID" />
-            <div class="form-group">
-                <input type="button" onclick="submitFrom()" value="Save" class="btn btn-primary" />
-            </div>
-        </form>
+        </div>
     </div>
 </div>
 
-<div>
-    <a asp-action="Index">Back to List</a>
-</div>
-
 @section Scripts {
-
     <script>
         var requiredCourses = @json;
         var requiredCourseIds = @reqIdjson;
@@ -217,7 +276,7 @@
 
             var removeButton = document.createElement("button");
             removeButton.classList.add("btn", "btn-sm", "btn-outline-danger");
-            removeButton.textContent = "Remove";
+            removeButton.innerHTML = '<i class="bi bi-trash"></i>';
             removeButton.onclick = function () {
                 this.parentNode.remove();
             };
@@ -247,7 +306,7 @@
 
             var removeButton = document.createElement("button");
             removeButton.classList.add("btn", "btn-sm", "btn-outline-danger");
-            removeButton.textContent = "Remove";
+            removeButton.innerHTML = '<i class="bi bi-trash"></i>';
             removeButton.onclick = function () {
                 this.parentNode.remove();
             };
@@ -277,7 +336,7 @@
 
             var removeButton = document.createElement("button");
             removeButton.classList.add("btn", "btn-sm", "btn-outline-danger");
-            removeButton.textContent = "Remove";
+            removeButton.innerHTML = '<i class="bi bi-trash"></i>';
             removeButton.onclick = function () {
                 this.parentNode.remove();
             };
@@ -307,7 +366,7 @@
 
             var removeButton = document.createElement("button");
             removeButton.classList.add("btn", "btn-sm", "btn-outline-danger");
-            removeButton.textContent = "Remove";
+            removeButton.innerHTML = '<i class="bi bi-trash"></i>';
             removeButton.onclick = function () {
                 this.parentNode.remove();
             };

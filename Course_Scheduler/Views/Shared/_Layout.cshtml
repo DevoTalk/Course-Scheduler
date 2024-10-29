@@ -1,67 +1,115 @@
 ﻿<!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - Course_Scheduler</title>
+    <title>@ViewData["Title"] - Course Scheduler</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/Course_Scheduler.styles.css" asp-append-version="true" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    @await RenderSectionAsync("style", required: false)
 </head>
-<body>
+
+<body class="d-flex flex-column min-vh-100">
     <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-            <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">Course_Scheduler</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
+        <nav class="navbar navbar-expand-lg navbar-dark bg-primary border-bottom shadow-sm fixed-top">
+            <div class="container">
+                <a class="navbar-brand d-flex align-items-center" asp-area="" asp-controller="Home" asp-action="Index">
+                    <i class="fas fa-calendar-alt me-2"></i>
+                    <span class="fw-bold">Course Scheduler</span>
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse"
+                    aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
+                <div class="navbar-collapse collapse">
+                    <ul class="navbar-nav ms-auto">
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+                            <a class="nav-link px-3" asp-area="" asp-controller="Home" asp-action="Index">
+                                <i class="fas fa-home me-2"></i>Home
+                            </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+                            <a class="nav-link px-3" asp-area="" asp-controller="Courses" asp-action="Index">
+                                <i class="fas fa-book me-2"></i>Courses
+                            </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Courses" asp-action="Index">Courses</a>
+                            <a class="nav-link px-3" asp-area="" asp-controller="Teachers" asp-action="Index">
+                                <i class="fas fa-chalkboard-teacher me-2"></i>Teachers
+                            </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Teachers" asp-action="Index">Teachers</a>
+                            <a class="nav-link px-3" asp-area="" asp-controller="Groups" asp-action="Index">
+                                <i class="fas fa-users me-2"></i>Groups
+                            </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Semester" asp-action="Index">Semester</a>
+                            <a class="nav-link px-3" asp-area="" asp-controller="Semester" asp-action="Index">
+                                <i class="fas fa-calendar me-2"></i>Semester
+                            </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Groups" asp-action="Index">Groups</a>
+                            <a class="nav-link px-3" asp-area="" asp-controller="Penalty" asp-action="Index">
+                                <i class="fas fa-exclamation-triangle me-2"></i>Penalty
+                            </a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Penalty" asp-action="Index">Penalty</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Scheduler" asp-action="Index">Scheduler</a>
+                        <li class="nav-item ms-2">
+                            <a class="nav-link btn btn-light text-primary px-4" asp-area="" asp-controller="Scheduler"
+                                asp-action="Index">
+                                <i class="fas fa-clock me-2"></i>Generate Schedule
+                            </a>
                         </li>
                     </ul>
                 </div>
             </div>
         </nav>
+        <div style="margin-top: 76px;"></div>
     </header>
-    <div class="container">
-        <main role="main" class="pb-3">
+
+    <div class="container-fluid px-4 py-3 flex-grow-1" style="margin-bottom: 80px;">
+        <main role="main">
             @RenderBody()
         </main>
     </div>
 
-    <footer class="border-top footer text-muted">
+    <br />
+    <br />
+    <br />
+
+    <footer class="footer py-4 bg-light border-top mt-auto">
         <div class="container">
-            &copy; 2024 - Course_Scheduler - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+            <div class="row align-items-center">
+                <div class="col-md-6 text-center text-md-start mb-3 mb-md-0">
+                    <span class="text-muted">
+                        <i class="far fa-copyright me-2"></i>2024 Course Scheduler
+                    </span>
+                    <br />
+                    <small class="text-muted">Created with <i class="fas fa-heart text-danger mx-1"></i> by
+                        Devotalk</small>
+                </div>
+                <div class="col-md-6 text-center text-md-end">
+                    <a asp-area="" asp-controller="Home" asp-action="Privacy"
+                        class="text-decoration-none text-muted me-3">
+                        <i class="fas fa-shield-alt me-2"></i>Privacy
+                    </a>
+                    <a href="#" class="text-decoration-none text-muted me-3">
+                        <i class="fas fa-question-circle me-2"></i>Help
+                    </a>
+                    <a href="#" class="text-decoration-none text-muted">
+                        <i class="fas fa-envelope me-2"></i>Contact
+                    </a>
+                </div>
+            </div>
         </div>
     </footer>
+
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
+
 </html>
