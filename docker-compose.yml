@@ -1,0 +1,12 @@
+# Please refer https://aka.ms/HTTPSinContainer on how to setup an https developer certificate for your ASP.NET Core service.
+
+version: '3.4'
+
+services:
+  coursescheduler:
+    image: coursescheduler
+    build:
+      context: .
+      dockerfile: Course_Scheduler/Dockerfile
+    ports:
+      - 5274:5274
